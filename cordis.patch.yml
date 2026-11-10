@@ -1,0 +1,54 @@
+# QuickDesk bundle patch.
+#
+# Every shortcut and tunable lives here as the inherited default. After DSH
+# starts, the same fields are editable in Settings → Plugins → QuickDesk; those
+# saves are written by DSH's config editor into the profile patch and override
+# the values below. A Loader patch replaces the row's whole config, so keep
+# every field you want to keep when overriding it from your own profile patch
+# (`~/.dsh/profiles/desktop/cordis.patch.yml`, higher priority).
+#
+# User-facing copy lives in locale/<language>.json (zh/en): meta title and
+# description, native-UI strings, approval-popup strings and the default task
+# protocol. To customize the protocol, write `defaultPrompt:` in your profile
+# patch (the Loader replaces the whole row, so re-specify every other field you
+# still want).
+- insert:
+    - id: quickdesk
+      name: dsh-quickdesk
+      config:
+        # --- shortcuts -----------------------------------------------------
+        hotkey: Ctrl+Alt+Space        # summon / hide the input box
+        submitKey: Enter              # submit the typed task
+        cancelKey: Escape             # close the input box without submitting
+        approveKey: Enter             # approve a pending approval popup
+        rejectKey: Backspace          # reject a pending approval popup
+        # --- language ------------------------------------------------------
+        # auto = follow the OS locale (zh for a Chinese system, en otherwise).
+        # zh / en force one language; it selects both the UI copy and the
+        # built-in task protocol.
+        language: auto
+        # --- status HUD ----------------------------------------------------
+        statusCorner: top-right       # top-right / top-left / bottom-right / bottom-left
+        statusEnabled: true
+        statusLingerMs: 20000
+        # --- task ----------------------------------------------------------
+        workspaceDirectory: ""        # empty = default DSH workspace
+        # Empty = built-in localized protocol from locale/<language>.json.
+        # A custom value replaces it and may use the {{MAX_STEPS}} placeholder.
+        defaultPrompt: ""
+        # Hard budget of tool calls for one task. When exceeded QuickDesk
+        # cancels the turn ("已停止 · 超过 N 步上限") instead of letting the
+        # model keep scrolling/screenshotting a page whose task is already done.
+        maxSteps: 20
+        enforceMaxSteps: true         # false = budget is prompt-only
+        # --- approvals -----------------------------------------------------
+        approvalPopup: true
+        popupTimeoutMs: 120000
+        autoPresetNewSessions: true
+        autoPresetName: auto
+        # Opt-in, host-side best effort: ask the DSH settings service to turn off
+        # dsh-computer-use-win's overlay / takeover indicator / mouse tag. Off by
+        # default: installing QuickDesk must not silently change another plugin's
+        # UI. If DSH rejects the write during HMR, the computer-use settings page
+        # can turn the same three switches off manually.
+        disableComputerUseUi: false

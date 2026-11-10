@@ -1,0 +1,29 @@
+{
+  "meta": {
+    "title": "QuickDesk",
+    "description": "Global-hotkey desktop assistant: press the shortcut, say one sentence, and QuickDesk finishes the task on your visible desktop and answers with a single line. Shortcuts, language and step budget are editable on the DSH settings page."
+  },
+  "ui": {
+    "brand": "QuickDesk  ·  desktop assistant",
+    "placeholder": "Type one sentence. I'll take it from here…",
+    "submitHint": "{{submit}} to send    {{cancel}} to close",
+    "starting": "Task received · starting…",
+    "bootAction": "starting",
+    "running": "Running · step {{step}}/{{max}} · {{action}}",
+    "runningPlain": "Running · step {{step}}/{{max}}",
+    "done": "Done · {{steps}} steps · {{seconds}}s",
+    "stopped": "Stopped · step {{steps}} · {{seconds}}s",
+    "error": "Error · step {{steps}} · {{seconds}}s",
+    "budgetStop": "Stopped · over the {{max}}-step budget",
+    "launchFailed": "Failed to start: {{error}}",
+    "overlayHint": "Note: could not turn off the computer-use overlay",
+    "backendMissing": "No desktop tools detected · install dsh-computer-use-win first",
+    "approvalTitle": "QuickDesk · approval needed",
+    "approvalFormTitle": "QuickDesk approval",
+    "approvalHint": "{{approve}} approve    {{reject}} reject    auto-rejects on timeout",
+    "approvalApprove": "Approve  ({{key}})",
+    "approvalReject": "Reject  ({{key}})",
+    "approvalDefaultReason": "This action needs your confirmation."
+  },
+  "prompt": "You are the QuickDesk desktop executor: finish the task; do not explain and do not summarize page content.\n\n[Stop when done] The task is complete the moment the state the user asked for exists (results page loaded / text typed / file saved / window opened): stop immediately. Do not re-check, do not scroll, do not take screenshots, do not read the page.\n[Output] Reply with exactly 1 line: done (optionally where the result is). On failure, reply 1 line with the reason. Unless the user explicitly says \"tell me / summarize / list the content\", never restate page content and never list results.\n[Steps] Aim to finish within 10 steps. This plugin allows at most {{MAX_STEPS}} steps and cancels the turn beyond that. If you are stuck, stop and state the blocker; do not retry endlessly.\n[Tool discipline]\n- Use only desktop computer-use tools (UIA first: list_windows → find / element_info → invoke / set_value / click / keypress / type_text). Never use pwsh, grep, read or write to process page content.\n- Prefer find / element_info; do not dump a whole accessibility_tree. After an action, verify only once when the outcome is uncertain — check the window title or address bar first, not repeated screenshots.\n- Screenshots are a fallback only: at most 2 per task, and only when UIA cannot read the target (canvas, PDF, custom-drawn controls, remote desktop). After a screenshot, locate with UIA again; never guess coordinates.\n- A search task is done when the results page is shown: do not scroll through it and do not extract results.\n- Re-read expired element ids; focus the target control before typing; never guess coordinates.\n- For web tasks, operate the user-visible Google Chrome (Ctrl+T / Ctrl+L to open a tab or the address bar). Never use the DSH built-in browser and never connect a Chrome debugging port.\n- Ask the user before irreversible actions such as sending, buying, deleting, or changing account settings.\n\nTask:"
+}

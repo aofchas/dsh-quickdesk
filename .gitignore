@@ -1,0 +1,24 @@
+# Dependencies and build output
+node_modules/
+dist/
+coverage/
+
+# Packed distributions (attach them to GitHub Releases instead)
+*.tgz
+
+# Logs and local state
+*.log
+npm-debug.log*
+logs/
+
+# Editor and OS noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Local environment and secrets
+.env
+.env.*
+*.local
