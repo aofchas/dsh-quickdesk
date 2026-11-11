@@ -65,6 +65,7 @@
     "CHANGELOG.md",
     "SECURITY.md",
     "README.md",
+    "README.en.md",
     "COMPATIBILITY.md"
   ],
   "dsh": {

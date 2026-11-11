@@ -4,9 +4,15 @@
 [![npm](https://img.shields.io/npm/v/dsh-quickdesk.svg)](https://www.npmjs.com/package/dsh-quickdesk)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
+**简体中文** · [English](README.en.md)
+
 **QuickDesk**（快捷桌面）是一个可安装、可分发的 DeepSeek Harness 桌面助手插件。它把
 “全局快捷键 → 一句话任务 → 桌面 computer-use 执行”的入口封装成一个独立插件包：
 快捷键、语言、任务协议、状态浮窗都可以直接在 **DSH 设置页**里调整，不需要手改 YAML。
+
+**QuickDesk** is an installable, distributable desktop-assistant plugin for DeepSeek Harness. It packages the
+“global hotkey → one-sentence task → desktop computer-use execution” loop as a standalone plugin: shortcuts,
+language, task protocol and the status HUD are all editable on the **DSH settings page** — no YAML editing required.
 
 > 仓库：<https://github.com/aofchas/dsh-quickdesk>（Windows 专用，PowerShell 5.1 + WinForms）
 
@@ -196,7 +202,7 @@ UIA 使用手册：[skills/uia/SKILL.md](skills/uia/SKILL.md)（工具映射、U
 ## 开发与自检
 
 ```powershell
-node scripts/selftest.mjs   # 42 项离线自检：文案一致性、语言解析、协议渲染、步数预算、取消 API、桌面工具识别、Config schema 与设置页接线
+node scripts/selftest.mjs   # 44 项离线自检：文案一致性、语言解析、协议渲染、步数预算、取消 API、桌面工具识别、Config schema 与设置页接线
 node --check client.js      # 设置页客户端语法检查
 ```
 

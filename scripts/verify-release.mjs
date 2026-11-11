@@ -96,6 +96,14 @@ check('README install command for the market', () => {
   if (!readme.includes('dsh plugin --profile web add dsh-quickdesk')) throw new Error('README must show the npm install command');
   return 'ok';
 });
+check('bilingual README', () => {
+  const zh = read('README.md');
+  const en = read('README.en.md');
+  if (!zh.includes('README.en.md')) throw new Error('README.md is missing the link to README.en.md');
+  if (!en.includes('README.md')) throw new Error('README.en.md is missing the link to README.md');
+  if (!en.includes('dsh plugin --profile web add dsh-quickdesk')) throw new Error('README.en.md is missing the npm install command');
+  return 'zh/en';
+});
 check('no packed distributions are published', () => {
   const files = manifest.files || [];
   for (const pattern of files) if (pattern.endsWith('.tgz')) throw new Error(`files includes ${pattern}`);
