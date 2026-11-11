@@ -104,6 +104,14 @@ check('bilingual README', () => {
   if (!en.includes('dsh plugin --profile web add dsh-quickdesk')) throw new Error('README.en.md is missing the npm install command');
   return 'zh/en';
 });
+check('README first screen states platform and backend requirement', () => {
+  for (const file of ['README.md', 'README.en.md']) {
+    const head = read(file).slice(0, 3000);
+    if (!/Windows/i.test(head)) throw new Error(`${file}: first screen does not say Windows-only`);
+    if (!head.includes('dsh-computer-use-win')) throw new Error(`${file}: first screen does not name the required backend plugin`);
+  }
+  return 'platform + backend';
+});
 check('no packed distributions are published', () => {
   const files = manifest.files || [];
   for (const pattern of files) if (pattern.endsWith('.tgz')) throw new Error(`files includes ${pattern}`);

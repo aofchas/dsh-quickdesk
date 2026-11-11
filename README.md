@@ -18,6 +18,11 @@
 “global hotkey → one-sentence task → desktop computer-use execution” loop as a standalone plugin: shortcuts,
 language, task protocol and the status HUD are all editable on the **DSH settings page** — no YAML editing required.
 
+> **平台 Platform**：Windows 10/11 + PowerShell 5.1（仅 Windows · Windows-only）
+>
+> **依赖 Requires**：[`dsh-computer-use-win`](https://github.com/yu-tao-li/dsh-computer-use-win) 或其它提供桌面工具的
+> computer-use 插件，作为桌面执行后端 · a desktop computer-use provider is required
+
 > 仓库：<https://github.com/aofchas/dsh-quickdesk>（Windows 专用，PowerShell 5.1 + WinForms）
 
 ## 功能
