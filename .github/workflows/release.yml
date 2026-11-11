@@ -10,7 +10,9 @@ permissions:
 
 jobs:
   publish:
-    runs-on: ubuntu-latest
+    # The plugin declares os: ["win32"], so installing/verifying it on a Linux
+    # runner fails npm ci with EBADPLATFORM. Build the release on Windows.
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,10 +25,12 @@ jobs:
       - name: Release metadata gate
         run: node scripts/verify-release.mjs
       - name: Verify tag matches package version
+        shell: bash
         run: |
           node -e "const v=require('./package.json').version; const tag=process.env.GITHUB_REF_NAME; if (tag !== 'v'+v) { console.error('tag '+tag+' != v'+v); process.exit(1); }"
       - name: Check whether this version is already on npm
         id: published
+        shell: bash
         run: |
           VERSION=$(node -p "require('./package.json').version")
           if npm view "dsh-quickdesk@$VERSION" version >/dev/null 2>&1; then
