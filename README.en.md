@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/icon.png" width="120" height="120" alt="QuickDesk icon" />
+</p>
+
 # QuickDesk
 
 [![CI](https://github.com/aofchas/dsh-quickdesk/actions/workflows/ci.yml/badge.svg)](https://github.com/aofchas/dsh-quickdesk/actions/workflows/ci.yml)
