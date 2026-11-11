@@ -25,9 +25,19 @@ jobs:
       - name: Verify tag matches package version
         run: |
           node -e "const v=require('./package.json').version; const tag=process.env.GITHUB_REF_NAME; if (tag !== 'v'+v) { console.error('tag '+tag+' != v'+v); process.exit(1); }"
+      - name: Check whether this version is already on npm
+        id: published
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view "dsh-quickdesk@$VERSION" version >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Pack
         run: npm pack
       - name: Publish to npm
+        if: steps.published.outputs.exists != 'true'
         run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
