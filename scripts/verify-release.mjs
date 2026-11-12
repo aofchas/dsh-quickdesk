@@ -112,6 +112,14 @@ check('README first screen states platform and backend requirement', () => {
   }
   return 'platform + backend';
 });
+check('dsh-plugin.org listing badge', () => {
+  for (const file of ['README.md', 'README.en.md']) {
+    const text = read(file);
+    if (!text.includes('https://dsh-plugin.org/badges/listed.svg')) throw new Error(`${file}: listing badge missing`);
+    if (!text.includes('https://dsh-plugin.org/plugins/aofchas/dsh-quickdesk')) throw new Error(`${file}: listing link missing`);
+  }
+  return 'listed';
+});
 check('no packed distributions are published', () => {
   const files = manifest.files || [];
   for (const pattern of files) if (pattern.endsWith('.tgz')) throw new Error(`files includes ${pattern}`);

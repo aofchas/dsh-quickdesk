@@ -7,6 +7,7 @@
 [![CI](https://github.com/aofchas/dsh-quickdesk/actions/workflows/ci.yml/badge.svg)](https://github.com/aofchas/dsh-quickdesk/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/dsh-quickdesk.svg)](https://www.npmjs.com/package/dsh-quickdesk)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Listed on dsh-plugin.org](https://dsh-plugin.org/badges/listed.svg)](https://dsh-plugin.org/plugins/aofchas/dsh-quickdesk)
 
 **English** · [简体中文](README.md)
 
