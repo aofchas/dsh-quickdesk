@@ -4,6 +4,29 @@ All notable changes to QuickDesk are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.3] - 2026-11-14
+
+### Added
+- Press-to-capture is now available for all five shortcut fields: summon, submit,
+  cancel, approve and reject. Single keys and Ctrl/Alt/Shift combinations are
+  accepted; modifier-only presses are ignored, Esc is a normal capturable key,
+  and the capture button (or clicking elsewhere) cancels recording.
+- Shortcut conflict handling: same-group `submit/cancel` or `approve/reject`
+  conflicts block saving and offer “Swap both”; a summon-hotkey conflict blocks
+  saving without swapping. Cross-context duplicates remain allowed, including
+  the default `Enter`/`Enter`.
+- `client-hotkey.test.mjs` covers capture formatting, warnings, the conflict
+  matrix and swap eligibility; Host `readConfig()` also resolves conflicts from
+  hand-edited YAML.
+- A failed sidecar `RegisterHotKey` now produces a visible HUD warning in
+  addition to `launcher.log`.
+
+### Changed
+- The shortcut modifier range is now **Ctrl/Alt/Shift only**. Win was previously
+  advertised but never implemented by the PowerShell sidecars.
+- Risky single keys show a non-blocking warning (global letters/digits for the
+  summon key; typing letters/digits/Space for submit/cancel).
+
 ## [1.2.2] - 2026-11-14
 
 ### Added

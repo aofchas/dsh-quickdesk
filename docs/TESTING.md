@@ -20,7 +20,7 @@
 3. `scripts/tests/encoding.test.mjs` — **所有 .ps1/.cmd 必须纯 ASCII**
 4. `scripts/tests/powershell-syntax.test.mjs` — PowerShell 5.1 解析 + GB2312 读取模拟
 5. `scripts/tests/module.test.mjs` — 配置、语言、协议、预算、locale 契约
-6. `scripts/tests/client-hotkey.test.mjs` — 设置页按键录入：组合键格式化、Esc 取消、修饰键过滤
+6. `scripts/tests/client-hotkey.test.mjs` — 设置页按键录入：组合键格式化、Esc 可录入、按钮/点击别处取消、修饰键过滤
 7. `scripts/tests/release-notes.test.mjs` — **每个版本必须有中英双语 Release 说明**
 8. `scripts/tests/diagnostics.test.mjs` — 诊断脚本生成 zip、内容完整、临时目录清理
 9. `scripts/tests/package.test.mjs` — manifest、版本一致性、npm pack 内容
@@ -151,8 +151,17 @@ node scripts/tests/launcher-runtime.test.mjs
 - [ ] 按默认热键弹出输入框。
 
 ### 6.2 快捷键矩阵
-- [ ] 设置页点击“按下组合键…”，按下 `Ctrl+Shift+F9`，字段自动填入且保存后生效；
-- [ ] 录入时仅按 Ctrl/Shift/Alt 不改变字段，按 Esc 取消录入；
+- [ ] 五个快捷键都能点击「按下组合键…」后按键录入并保存；
+- [ ] 录入 `Ctrl+Shift+F9` 等组合键，字段自动填入且保存后生效；
+- [ ] 审批通过/拒绝键录入组合键后，审批弹窗行为正确；
+- [ ] 只按 Ctrl/Shift/Alt 不改变字段，再次点击按钮或点击别处取消录入；
+- [ ] Esc 可以作为普通按键录入（包括把取消键设为 Esc）；
+- [ ] 提交/取消键设为裸字母/数字/Space 时出现“输入框内无法输入”提示，但仍允许保存；
+- [ ] 呼出快捷键设为裸字母/数字时出现高风险提示；
+- [ ] `submit` 与 `cancel` 相同、`approve` 与 `reject` 相同时阻止保存，并可用「交换两者」解决；
+- [ ] `hotkey` 与任意其它快捷键相同时阻止保存，且不提供交换；
+- [ ] `submit=Enter` 与 `approve=Enter` 仍然允许（跨上下文共享）；
+- [ ] 系统已占用呼出快捷键时，保存后 HUD/`launcher.log` 显示注册失败提示；
 - [ ] `Ctrl+Alt+Space` 弹框；
 - [ ] `Ctrl+0` 弹框（本次问题键）；
 - [ ] `Ctrl+Shift+0` 弹框；

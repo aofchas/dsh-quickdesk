@@ -1,6 +1,6 @@
 {
   "name": "dsh-quickdesk",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "QuickDesk（快捷桌面）— a global-hotkey desktop assistant for DeepSeek Harness: in-app settings page, bilingual completion-first task protocol, hard step budget, one-line status HUD and an in-app diagnostics report.",
   "type": "module",
   "main": "quickdesk.mjs",

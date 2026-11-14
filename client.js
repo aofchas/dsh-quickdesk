@@ -53,17 +53,22 @@ window.__ModuleLoader__.load({
         groupTask: '任务执行',
         groupApproval: '审批与权限',
         labelHotkey: '呼出快捷键',
-        hintHotkey: '点击“按下组合键”后直接按组合键；支持 Ctrl/Alt/Shift/Win',
+        hintHotkey: '任意程序前台下按下即呼出输入框；支持单键或 Ctrl/Alt/Shift 组合',
         captureHotkey: '按下组合键…',
-        capturingHotkey: '请按下组合键（Esc 取消）',
+        capturingHotkey: '请按下快捷键（再次点击按钮取消）',
+        hotkeySingleKeyWarning: '单键全局热键会影响其他程序的输入，建议使用组合键或 F 键。',
+        actionTypingWarning: '这个单键在输入框内将无法正常输入，建议改用组合键。',
+        shortcutConflict: '快捷键冲突',
+        swapShortcuts: '交换两者',
+        shortcutsSwapped: '已交换两个快捷键',
         labelSubmitKey: '提交键',
-        hintSubmitKey: '输入框里按下即提交任务',
+        hintSubmitKey: '输入框里按下即提交任务；支持单键或 Ctrl/Alt/Shift 组合',
         labelCancelKey: '取消键',
-        hintCancelKey: '关闭输入框、不提交',
+        hintCancelKey: '关闭输入框、不提交；支持单键或 Ctrl/Alt/Shift 组合',
         labelApproveKey: '审批通过键',
-        hintApproveKey: '审批弹窗中按下即通过',
+        hintApproveKey: '审批弹窗中按下即通过；支持单键或 Ctrl/Alt/Shift 组合',
         labelRejectKey: '审批拒绝键',
-        hintRejectKey: '审批弹窗中按下即拒绝',
+        hintRejectKey: '审批弹窗中按下即拒绝；支持单键或 Ctrl/Alt/Shift 组合',
         labelLanguage: '界面与任务协议语言',
         hintLanguage: 'auto 跟随系统语言；任务协议与所有界面文案同步切换',
         languageAuto: '自动（跟随系统）',
@@ -115,7 +120,7 @@ window.__ModuleLoader__.load({
         unavailable: 'QuickDesk 设置当前不可用。刚安装或升级插件后，请完全退出并重启 DSH。',
         reload: '重新加载页面',
         notWritable: '当前 profile 不允许从界面修改设置。',
-        invalidKey: '快捷键格式无效：写一个按键，可带 Ctrl/Alt/Shift/Win，例如 Ctrl+Alt+Space',
+        invalidKey: '快捷键格式无效：写一个按键，可带 Ctrl/Alt/Shift，例如 Ctrl+Alt+Space',
         invalidNumber: '数值超出允许范围',
         invalidInteger: '请填写整数'
       },
@@ -129,17 +134,22 @@ window.__ModuleLoader__.load({
         groupTask: 'Task execution',
         groupApproval: 'Approvals and permissions',
         labelHotkey: 'Hotkey',
-        hintHotkey: 'Click “Press shortcut…” and press the combination; supports Ctrl/Alt/Shift/Win',
+        hintHotkey: 'Pressed from any foreground app to summon the input box; supports single keys or Ctrl/Alt/Shift combos',
         captureHotkey: 'Press shortcut…',
-        capturingHotkey: 'Press keys (Esc to cancel)',
+        capturingHotkey: 'Press keys (click the button again to cancel)',
+        hotkeySingleKeyWarning: 'A single-key global hotkey can swallow input in other apps; prefer a combination or an F key.',
+        actionTypingWarning: 'This single key cannot be typed in the input box; prefer a combination.',
+        shortcutConflict: 'Shortcut conflict',
+        swapShortcuts: 'Swap both',
+        shortcutsSwapped: 'The two shortcuts were swapped',
         labelSubmitKey: 'Submit key',
-        hintSubmitKey: 'Pressed in the input box to submit the task',
+        hintSubmitKey: 'Pressed in the input box to submit the task; supports single keys or Ctrl/Alt/Shift combos',
         labelCancelKey: 'Cancel key',
-        hintCancelKey: 'Closes the input box without submitting',
+        hintCancelKey: 'Closes the input box without submitting; supports single keys or Ctrl/Alt/Shift combos',
         labelApproveKey: 'Approve key',
-        hintApproveKey: 'Approves a pending approval popup',
+        hintApproveKey: 'Approves a pending approval popup; supports single keys or Ctrl/Alt/Shift combos',
         labelRejectKey: 'Reject key',
-        hintRejectKey: 'Rejects a pending approval popup',
+        hintRejectKey: 'Rejects a pending approval popup; supports single keys or Ctrl/Alt/Shift combos',
         labelLanguage: 'UI and task-protocol language',
         hintLanguage: 'auto follows the OS language; changes the protocol and all UI copy together',
         languageAuto: 'Auto (follow system)',
@@ -191,13 +201,13 @@ window.__ModuleLoader__.load({
         unavailable: 'QuickDesk settings are unavailable right now. After installing or upgrading the plugin, fully quit and restart DSH.',
         reload: 'Reload the page',
         notWritable: 'This profile does not allow editing settings from the UI.',
-        invalidKey: 'Invalid shortcut: one key with optional Ctrl/Alt/Shift/Win, e.g. Ctrl+Alt+Space',
+        invalidKey: 'Invalid shortcut: one key with optional Ctrl/Alt/Shift, e.g. Ctrl+Alt+Space',
         invalidNumber: 'Number out of range',
         invalidInteger: 'Enter a whole number'
       }
     };
 
-    const KEY_RE = /^(?:(?:ctrl|alt|shift|win)\+)*(?:[a-z0-9]|f(?:[1-9]|1[0-9]|2[0-4])|space|enter|return|escape|esc|tab|backspace|delete|insert|home|end|pageup|pagedown|up|down|left|right)$/i;
+    const KEY_RE = /^(?:(?:ctrl|alt|shift)\+)*(?:[a-z0-9]|f(?:[1-9]|1[0-9]|2[0-4])|space|enter|return|escape|esc|tab|backspace|delete|insert|home|end|pageup|pagedown|up|down|left|right)$/i;
 
     function isKeySpec(value) {
       const text = String(value === undefined || value === null ? '' : value).replace(/\s+/g, '');
@@ -237,22 +247,91 @@ window.__ModuleLoader__.load({
     }
 
     function formatHotkeyEvent(event) {
-      if (!event) return null;
+      if (!event || event.metaKey) return null;
       const key = normalizeCapturedKey(event.key);
       if (!key) return null;
       const parts = [];
       if (event.ctrlKey) parts.push('Ctrl');
       if (event.altKey) parts.push('Alt');
       if (event.shiftKey) parts.push('Shift');
-      if (event.metaKey) parts.push('Win');
       parts.push(key);
       const spec = parts.join('+');
       return isKeySpec(spec) ? spec : null;
     }
 
+    const SHORTCUT_FIELDS = ['hotkey', 'submitKey', 'cancelKey', 'approveKey', 'rejectKey'];
+    const SHORTCUT_CONFLICT_GROUPS = [
+      ['hotkey', 'submitKey'],
+      ['hotkey', 'cancelKey'],
+      ['hotkey', 'approveKey'],
+      ['hotkey', 'rejectKey'],
+      ['submitKey', 'cancelKey'],
+      ['approveKey', 'rejectKey']
+    ];
+
+    function canonicalKeySpec(value) {
+      const raw = String(value === undefined || value === null ? '' : value).trim();
+      if (!isKeySpec(raw)) return '';
+      const parts = raw.split('+').map((part) => part.trim()).filter(Boolean);
+      const modifiers = [];
+      let key = '';
+      for (const part of parts) {
+        const lower = part.toLowerCase();
+        if (lower === 'ctrl' || lower === 'control') modifiers.push('ctrl');
+        else if (lower === 'alt') modifiers.push('alt');
+        else if (lower === 'shift') modifiers.push('shift');
+        else key = normalizeCapturedKey(part) || '';
+      }
+      if (!key) return '';
+      const ordered = ['ctrl', 'alt', 'shift'].filter((modifier) => modifiers.includes(modifier));
+      return (ordered.length > 0 ? ordered.join('+') + '+' : '') + key.toLowerCase();
+    }
+
+    function shortcutConflict(draft) {
+      if (!draft) return null;
+      for (const group of SHORTCUT_CONFLICT_GROUPS) {
+        for (let i = 0; i < group.length; i += 1) {
+          for (let j = i + 1; j < group.length; j += 1) {
+            const field = group[i];
+            const otherField = group[j];
+            const left = canonicalKeySpec(draft[field]);
+            const right = canonicalKeySpec(draft[otherField]);
+            if (left && right && left === right) return { field, otherField, spec: String(draft[field]).trim() };
+          }
+        }
+      }
+      return null;
+    }
+
+    function canSwapShortcutConflict(conflict) {
+      return Boolean(conflict && conflict.field !== 'hotkey' && conflict.otherField !== 'hotkey');
+    }
+
+    function swapShortcutValue(draft, conflict, editedField, previousValue) {
+      if (!draft || !canSwapShortcutConflict(conflict) || !isKeySpec(previousValue)) return draft;
+      const source = editedField === conflict.field
+        ? conflict.field
+        : editedField === conflict.otherField
+          ? conflict.otherField
+          : null;
+      if (!source) return draft;
+      const target = source === conflict.field ? conflict.otherField : conflict.field;
+      return { ...draft, [target]: previousValue };
+    }
+
+    function shortcutWarning(field, value) {
+      if (!isKeySpec(value)) return '';
+      const parts = String(value).split('+').map((part) => part.trim()).filter(Boolean);
+      if (parts.length > 1) return '';
+      const key = normalizeCapturedKey(parts[0]);
+      if (!key) return '';
+      if (field === 'hotkey' && !/^F(?:[1-9]|1[0-9]|2[0-4])$/.test(key)) return 'hotkeySingleKeyWarning';
+      if ((field === 'submitKey' || field === 'cancelKey') && (/^[A-Z0-9]$/.test(key) || key === 'Space')) return 'actionTypingWarning';
+      return '';
+    }
+
     function captureHotkeyEvent(event) {
       if (!event || event.repeat) return null;
-      if (event.key === 'Escape') return { action: 'cancel' };
       if (MODIFIER_KEYS.has(String(event.key || '').toLowerCase())) return null;
       const value = formatHotkeyEvent(event);
       return value ? { action: 'set', value } : null;
@@ -292,6 +371,19 @@ window.__ModuleLoader__.load({
       },
       inline: { display: 'flex', alignItems: 'center', gap: '8px' },
       hotkeyRow: { display: 'flex', alignItems: 'center', gap: '8px' },
+      shortcutBox: { display: 'flex', flexDirection: 'column', gap: '4px' },
+      warning: { margin: 0, color: 'var(--dsw-alias-state-warning-primary, #e0b25e)', fontSize: '12px', lineHeight: '1.4' },
+      conflict: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        flexWrap: 'wrap',
+        padding: '8px 10px',
+        borderRadius: '6px',
+        border: '1px solid var(--dsw-alias-state-danger-primary, #ff6b6b)',
+        color: 'var(--dsw-alias-state-danger-primary, #ff6b6b)',
+        fontSize: '12px'
+      },
       footer: { display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', paddingTop: '4px' },
       note: { color: 'var(--dsw-alias-label-tertiary, #9aa0aa)', fontSize: '12px' },
       button: {
@@ -349,8 +441,10 @@ window.__ModuleLoader__.load({
       const [message, setMessage] = React.useState('');
       const [tone, setTone] = React.useState('');
       const [diagnosticsBusy, setDiagnosticsBusy] = React.useState(false);
-      const [capturingHotkey, setCapturingHotkey] = React.useState(false);
-      const hotkeyCaptureRef = React.useRef(null);
+      const [capturingField, setCapturingField] = React.useState(null);
+      const captureRefs = React.useRef({});
+      const previousShortcutRef = React.useRef({});
+      const lastEditedShortcutRef = React.useRef(null);
 
       React.useEffect(() => {
         if (!dirty) setDraft(saved);
@@ -363,25 +457,38 @@ window.__ModuleLoader__.load({
       }, [diagnosticsBusy]);
 
       React.useEffect(() => {
-        if (!capturingHotkey) return;
-        const node = hotkeyCaptureRef.current;
+        if (!capturingField) return;
+        const node = captureRefs.current[capturingField];
         if (node && typeof node.focus === 'function') node.focus();
-      }, [capturingHotkey]);
+      }, [capturingField]);
 
       if (!ready) return h(Notice, { t: tr, status: state && state.status });
 
       const writable = state.writable !== false;
       const disabled = !writable || saving;
+      const conflict = shortcutConflict(draft);
+      const shortcutLabel = (field) => tr({
+        hotkey: 'labelHotkey',
+        submitKey: 'labelSubmitKey',
+        cancelKey: 'labelCancelKey',
+        approveKey: 'labelApproveKey',
+        rejectKey: 'labelRejectKey'
+      }[field]);
       const change = (field, value) => {
+        if (SHORTCUT_FIELDS.includes(field)) {
+          previousShortcutRef.current[field] = draft[field];
+          lastEditedShortcutRef.current = field;
+        }
         setDraft((previous) => ({ ...previous, [field]: value }));
         setDirty(true);
         setMessage('');
         setTone('');
       };
       const validate = () => {
-        for (const field of ['hotkey', 'submitKey', 'cancelKey', 'approveKey', 'rejectKey']) {
+        for (const field of SHORTCUT_FIELDS) {
           if (!isKeySpec(draft[field])) return 'invalidKey';
         }
+        if (conflict) return 'shortcutConflict';
         for (const [field, [min, max]] of Object.entries(NUMBER_RULES)) {
           const value = draft[field];
           if (!Number.isInteger(value)) return 'invalidInteger';
@@ -395,7 +502,11 @@ window.__ModuleLoader__.load({
         const invalid = validate();
         if (invalid) {
           setTone('error');
-          setMessage(tr(invalid));
+          if (invalid === 'shortcutConflict' && conflict) {
+            setMessage(tr('shortcutConflict') + ': ' + shortcutLabel(conflict.field) + ' ↔ ' + shortcutLabel(conflict.otherField));
+          } else {
+            setMessage(tr(invalid));
+          }
           return;
         }
         const patch = {};
@@ -442,20 +553,35 @@ window.__ModuleLoader__.load({
           setMessage(tr('saveFailed') + (error && error.message ? ': ' + String(error.message) : ''));
         }
       };
-      const captureHotkeyKeyDown = (event) => {
-        if (!capturingHotkey) return;
+      const captureShortcutKeyDown = (event, field) => {
+        if (capturingField !== field) return;
         event.preventDefault();
         event.stopPropagation();
         const captured = captureHotkeyEvent(event);
         if (!captured) return;
-        setCapturingHotkey(false);
-        if (captured.action === 'cancel') return;
-        change('hotkey', captured.value);
+        setCapturingField(null);
+        change(field, captured.value);
       };
-      const toggleHotkeyCapture = () => {
+      const toggleCapture = (field) => {
         if (disabled) return;
-        setCapturingHotkey((value) => !value);
+        setCapturingField((current) => current === field ? null : field);
       };
+      const swapShortcutConflict = () => {
+        const edited = lastEditedShortcutRef.current;
+        const previous = edited ? previousShortcutRef.current[edited] : undefined;
+        const next = swapShortcutValue(draft, conflict, edited, previous);
+        if (next === draft) return;
+        setDraft(next);
+        setDirty(true);
+        setTone('success');
+        setMessage(tr('shortcutsSwapped'));
+      };
+      const swapSource = conflict && lastEditedShortcutRef.current === conflict.field
+        ? conflict.field
+        : conflict && lastEditedShortcutRef.current === conflict.otherField
+          ? conflict.otherField
+          : null;
+      const swapAvailable = Boolean(conflict && canSwapShortcutConflict(conflict) && swapSource && isKeySpec(previousShortcutRef.current[swapSource]));
 
       const text = (field, extraStyle) => h('input', {
         id: 'quickdesk-' + field,
@@ -465,6 +591,31 @@ window.__ModuleLoader__.load({
         disabled,
         onChange: (event) => change(field, event.target.value)
       });
+      const shortcutWarningText = (field) => {
+        const warning = shortcutWarning(field, draft[field]);
+        return warning ? h('p', { style: styles.warning }, tr(warning)) : null;
+      };
+      const shortcutControl = (field) => h('div', { style: styles.hotkeyRow },
+        text(field, { flex: '1 1 auto', minWidth: 0 }),
+        h('button', {
+          type: 'button',
+          ref: (node) => { captureRefs.current[field] = node; },
+          style: capturingField === field ? styles.primary : styles.button,
+          disabled,
+          onClick: () => toggleCapture(field),
+          onKeyDown: (event) => captureShortcutKeyDown(event, field),
+          onBlur: () => {
+            if (capturingField === field) setCapturingField(null);
+          },
+          title: tr('captureHotkey'),
+          'aria-pressed': capturingField === field
+        }, capturingField === field ? tr('capturingHotkey') : tr('captureHotkey')));
+      const shortcutField = (field, labelKey, hintKey) => h(Field, {
+        label: tr(labelKey),
+        hint: tr(hintKey)
+      }, h('div', { style: styles.shortcutBox },
+        shortcutControl(field),
+        shortcutWarningText(field)));
       const number = (field, step) => h('input', {
         id: 'quickdesk-' + field,
         type: 'number',
@@ -500,26 +651,19 @@ window.__ModuleLoader__.load({
         h('p', { style: styles.intro }, tr('intro')),
         h('div', { style: styles.group },
           h('h3', { style: styles.groupTitle }, tr('groupShortcuts')),
-          h(Field, { label: tr('labelHotkey'), hint: tr('hintHotkey') },
-            h('div', { style: styles.hotkeyRow },
-              text('hotkey', { flex: '1 1 auto', minWidth: 0 }),
-              h('button', {
-                type: 'button',
-                ref: hotkeyCaptureRef,
-                style: capturingHotkey ? styles.primary : styles.button,
-                disabled,
-                onClick: toggleHotkeyCapture,
-                onKeyDown: captureHotkeyKeyDown,
-                onBlur: () => {
-                  if (capturingHotkey) setCapturingHotkey(false);
-                },
-                title: tr('hintHotkey'),
-                'aria-pressed': capturingHotkey
-              }, capturingHotkey ? tr('capturingHotkey') : tr('captureHotkey')))),
-          h(Field, { label: tr('labelSubmitKey'), hint: tr('hintSubmitKey') }, text('submitKey')),
-          h(Field, { label: tr('labelCancelKey'), hint: tr('hintCancelKey') }, text('cancelKey')),
-          h(Field, { label: tr('labelApproveKey'), hint: tr('hintApproveKey') }, text('approveKey')),
-          h(Field, { label: tr('labelRejectKey'), hint: tr('hintRejectKey') }, text('rejectKey'))),
+          shortcutField('hotkey', 'labelHotkey', 'hintHotkey'),
+          shortcutField('submitKey', 'labelSubmitKey', 'hintSubmitKey'),
+          shortcutField('cancelKey', 'labelCancelKey', 'hintCancelKey'),
+          shortcutField('approveKey', 'labelApproveKey', 'hintApproveKey'),
+          shortcutField('rejectKey', 'labelRejectKey', 'hintRejectKey'),
+          conflict ? h('div', { style: styles.conflict },
+            h('span', null, tr('shortcutConflict') + ': ' + shortcutLabel(conflict.field) + ' ↔ ' + shortcutLabel(conflict.otherField)),
+            swapAvailable ? h('button', {
+              type: 'button',
+              style: styles.button,
+              disabled,
+              onClick: swapShortcutConflict
+            }, tr('swapShortcuts')) : null) : null),
         h('div', { style: styles.group },
           h('h3', { style: styles.groupTitle }, tr('groupLanguage')),
           h(Field, { label: tr('labelLanguage'), hint: tr('hintLanguage') },
@@ -639,6 +783,6 @@ window.__ModuleLoader__.load({
       });
     }
 
-    return { apply, inject: ['slots', 'locale'], __test: { formatHotkeyEvent, captureHotkeyEvent, isKeySpec } };
+    return { apply, inject: ['slots', 'locale'], __test: { formatHotkeyEvent, captureHotkeyEvent, isKeySpec, canonicalKeySpec, shortcutConflict, canSwapShortcutConflict, swapShortcutValue, shortcutWarning } };
   }
 });

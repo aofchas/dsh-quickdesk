@@ -40,7 +40,7 @@ language, task protocol and the status HUD are all editable on the **DSH setting
 
 ## 功能
 
-1. **全局快捷键**：默认 `Ctrl+Alt+Space`，可在设置页直接按下想要的组合键录入；任何程序前台下呼出半透明输入框，按配置的提交键执行，取消键关闭。
+1. **全局快捷键**：默认 `Ctrl+Alt+Space`；五个快捷键（呼出、提交、取消、审批通过、审批拒绝）都可以在设置页点击「按下组合键…」直接录入，支持单键或 Ctrl/Alt/Shift 组合。高风险单键会给出提示；同组冲突会阻止保存并支持「交换两者」，呼出快捷键与其它快捷键冲突时不允许保存。再次点击按钮或点击别处取消录入，Esc 也可作为普通按键录入。任何程序前台下呼出半透明输入框，按配置的提交键执行，取消键关闭。
 2. **DSH 设置页**：设置 → Plugins → QuickDesk，直接修改快捷键、语言、状态浮窗、工作目录、任务协议、步数预算、审批选项；保存写入当前 profile 的配置，无需编辑 `cordis.patch.yml`。
 3. **完成优先的任务协议**：每条任务前自动附加内置说明（按语言取 `locale/<language>.json` 的 `prompt`）：
    - **完成即停**：目标状态出现（结果页已加载 / 文字已输入 / 文件已保存）就结束，不再滚动、截图、读取页面；
@@ -92,7 +92,7 @@ dsh plugin --profile web add dsh-quickdesk
 dsh plugin --profile desktop add dsh-quickdesk
 ```
 
-也可以从 GitHub Release 下载 `dsh-quickdesk-1.2.2.tgz`，在 DSH「插件 → 添加插件」中选择安装，
+也可以从 GitHub Release 下载 `dsh-quickdesk-1.2.3.tgz`，在 DSH「插件 → 添加插件」中选择安装，
 或从本地源码目录安装（在仓库根目录执行，把 `.` 换成实际克隆目录也可以）：
 
 ```powershell
@@ -104,7 +104,7 @@ dsh plugin --profile desktop add .
 ## 版本与变更
 
 - 变更记录：[CHANGELOG.md](https://github.com/aofchas/dsh-quickdesk/blob/main/CHANGELOG.md)
-- 1.2.2 发布说明：[docs/release-notes/1.2.2.md](https://github.com/aofchas/dsh-quickdesk/blob/main/docs/release-notes/1.2.2.md)
+- 1.2.3 发布说明：[docs/release-notes/1.2.3.md](https://github.com/aofchas/dsh-quickdesk/blob/main/docs/release-notes/1.2.3.md)
 
 ## 配置
 
@@ -144,7 +144,7 @@ dsh plugin --profile desktop add .
 
 | 字段 | 默认 | 作用 |
 |---|---|---|
-| `hotkey` | `Ctrl+Alt+Space` | 呼出 / 收起输入框（支持 Ctrl/Alt/Shift/Win + 字母/数字/F1–F24/Space 等） |
+| `hotkey` | `Ctrl+Alt+Space` | 呼出 / 收起输入框（支持单键或 Ctrl/Alt/Shift 组合；设置页可直接按键录入） |
 | `submitKey` | `Enter` | 提交任务（可写 `Ctrl+Enter` 这类组合键） |
 | `cancelKey` | `Escape` | 关闭输入框 |
 | `approveKey` | `Enter` | 审批通过 |
@@ -258,6 +258,7 @@ node --check client.js      # 设置页客户端语法检查
 - 状态条跟踪最近一次由 QuickDesk 发起的任务；多任务并发时显示最新任务。
 - 步数上限命中时本轮会被取消，不会输出完成说明；复杂任务记得调高 `maxSteps`。
 - 电脑操控同一时间只允许一个会话使用桌面（computer-use 插件自身的互斥）；其他会话在用时，新任务会失败并提示。
+- 系统级热键占用无法在保存前完整检测；如果 sidecar 注册失败，HUD 和 `launcher.log` 会提示。
 - 内置文案目前只有中文和英文；其他系统语言回落到英文。
 
 ## 安全

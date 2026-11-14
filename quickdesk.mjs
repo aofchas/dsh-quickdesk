@@ -173,6 +173,69 @@ export function plainVolatileConfig(raw) {
   return result;
 }
 
+const SHORTCUT_FIELDS = ['hotkey', 'submitKey', 'cancelKey', 'approveKey', 'rejectKey'];
+const SHORTCUT_CONFLICT_GROUPS = [
+  ['hotkey', 'submitKey'],
+  ['hotkey', 'cancelKey'],
+  ['hotkey', 'approveKey'],
+  ['hotkey', 'rejectKey'],
+  ['submitKey', 'cancelKey'],
+  ['approveKey', 'rejectKey']
+];
+
+function canonicalShortcut(value) {
+  const text = String(value === undefined || value === null ? '' : value).trim().toLowerCase().replace(/\s+/g, '');
+  if (!text) return '';
+  const modifiers = [];
+  let key = '';
+  for (const part of text.split('+')) {
+    if (!part) continue;
+    if (part === 'ctrl' || part === 'control') modifiers.push('ctrl');
+    else if (part === 'alt') modifiers.push('alt');
+    else if (part === 'shift') modifiers.push('shift');
+    else if (part === 'win') continue; // Win is not implemented by the sidecars.
+    else key = part === 'esc' ? 'escape' : part === 'return' ? 'enter' : part;
+  }
+  if (!key) return '';
+  const ordered = ['ctrl', 'alt', 'shift'].filter((modifier) => modifiers.includes(modifier));
+  return (ordered.length > 0 ? ordered.join('+') + '+' : '') + key;
+}
+
+function findShortcutConflict(config) {
+  for (const [left, right] of SHORTCUT_CONFLICT_GROUPS) {
+    const a = canonicalShortcut(config[left]);
+    const b = canonicalShortcut(config[right]);
+    if (a && b && a === b) return { field: left, otherField: right };
+  }
+  return null;
+}
+
+function resolveShortcutConflicts(config) {
+  let conflict = findShortcutConflict(config);
+  let guard = 0;
+  while (conflict && guard < 8) {
+    guard += 1;
+    if (conflict.field === 'hotkey' || conflict.otherField === 'hotkey') {
+      const action = conflict.field === 'hotkey' ? conflict.otherField : conflict.field;
+      if (canonicalShortcut(config.hotkey) !== canonicalShortcut(DEFAULTS.hotkey)) config.hotkey = DEFAULTS.hotkey;
+      else config[action] = DEFAULTS[action];
+    } else {
+      const target = conflict.otherField === 'cancelKey' || conflict.otherField === 'rejectKey'
+        ? conflict.otherField
+        : conflict.field;
+      if (canonicalShortcut(config[target]) === canonicalShortcut(DEFAULTS[target])) {
+        config[conflict.field] = DEFAULTS[conflict.field];
+      } else {
+        config[target] = DEFAULTS[target];
+      }
+    }
+    conflict = findShortcutConflict(config);
+  }
+  if (conflict) {
+    for (const field of SHORTCUT_FIELDS) config[field] = DEFAULTS[field];
+  }
+}
+
 export function readConfig(raw) {
   const config = { ...DEFAULTS };
   if (raw && typeof raw === 'object') {
@@ -183,6 +246,7 @@ export function readConfig(raw) {
   for (const key of ['hotkey', 'submitKey', 'cancelKey', 'approveKey', 'rejectKey']) {
     if (typeof config[key] !== 'string' || config[key].trim() === '') config[key] = DEFAULTS[key];
   }
+  resolveShortcutConflicts(config);
   if (!['top-right', 'top-left', 'bottom-right', 'bottom-left'].includes(config.statusCorner)) config.statusCorner = DEFAULTS.statusCorner;
   if (typeof config.statusEnabled !== 'boolean') config.statusEnabled = DEFAULTS.statusEnabled;
   if (!Number.isFinite(config.statusLingerMs) || config.statusLingerMs < 1000) config.statusLingerMs = DEFAULTS.statusLingerMs;
@@ -312,7 +376,13 @@ export function apply(ctx, rawConfig) {
     });
     child.stderr.on('data', (chunk) => {
       const message = String(chunk).trim();
-      if (message) log.warn('QuickDesk sidecar: %s', message);
+      if (message) {
+        log.warn('QuickDesk sidecar: %s', message);
+        if (message.includes('hotkey-unavailable|')) {
+          const spec = message.split('|').pop().trim() || config.hotkey;
+          sendStatus(text('hotkeyUnavailable', { hotkey: spec }), 15000);
+        }
+      }
     });
     child.once('close', (code) => {
       log.warn('QuickDesk sidecar exited with %s', String(code));

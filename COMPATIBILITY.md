@@ -7,7 +7,7 @@ change, or at most a one-file change.
 
 | Component | Version |
 |---|---|
-| QuickDesk | 1.2.2 |
+| QuickDesk | 1.2.3 |
 | DeepSeek Harness Desktop | 0.2.2-rc.3 |
 | `@deepseek-ai/dsh` runtime | 0.2.2-rc.3 |
 | `dsh-computer-use-win` (optional, not imported) | 0.5.6 |

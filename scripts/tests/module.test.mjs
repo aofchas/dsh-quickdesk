@@ -88,6 +88,24 @@ check('readConfig() rejects invalid hotkeys/keys', () => {
   equal(config.cancelKey, 'Escape');
 });
 
+check('readConfig() resolves conflicting shortcuts safely', () => {
+  let config = qd.readConfig({ hotkey: 'Enter' });
+  equal(config.hotkey, 'Ctrl+Alt+Space');
+  equal(config.submitKey, 'Enter');
+
+  config = qd.readConfig({ submitKey: 'Escape', cancelKey: 'Escape' });
+  equal(config.submitKey, 'Enter');
+  equal(config.cancelKey, 'Escape');
+
+  config = qd.readConfig({ approveKey: 'Backspace', rejectKey: 'Backspace' });
+  equal(config.approveKey, 'Enter');
+  equal(config.rejectKey, 'Backspace');
+
+  config = qd.readConfig({ submitKey: 'Enter', approveKey: 'Enter' });
+  equal(config.submitKey, 'Enter');
+  equal(config.approveKey, 'Enter');
+});
+
 check('readConfig() clamps invalid numbers and enums', () => {
   const config = qd.readConfig({
     statusCorner: 'diagonal',

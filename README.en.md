@@ -26,7 +26,7 @@ shortcuts, language, task protocol and status HUD are all editable on the **DSH 
 
 ## Features
 
-1. **Global hotkey**: `Ctrl+Alt+Space` by default; press the combination you want directly in Settings to capture it. Summon a translucent input box from any foreground app, submit with the configured key, close with the cancel key.
+1. **Global hotkey**: `Ctrl+Alt+Space` by default. All five shortcuts (summon, submit, cancel, approve, reject) can be captured directly in Settings with “Press shortcut…”, supporting single keys or Ctrl/Alt/Shift combinations. Risky single keys show a warning; same-group conflicts block saving and offer “Swap both”, while a summon-hotkey conflict cannot be saved. Click the capture button again or click elsewhere to cancel recording; Esc is also captured as a normal key. Press the configured hotkey from any foreground app to summon the input box, submit with the configured key, close with the cancel key.
 2. **DSH settings page**: Settings → Plugins → QuickDesk lets you edit shortcuts, language, status HUD, workspace, task protocol, step budget and approval options; saving writes into the active profile configuration, so you never edit `cordis.patch.yml` by hand.
 3. **Completion-first task protocol**: every task is prefixed with built-in instructions (chosen from `locale/<language>.json` → `prompt`):
    - **Stop when done**: once the requested state exists (results page loaded / text typed / file saved), stop — no more scrolling, screenshots or page reading;
@@ -78,7 +78,7 @@ dsh plugin --profile web add dsh-quickdesk
 dsh plugin --profile desktop add dsh-quickdesk
 ```
 
-Alternatively, download `dsh-quickdesk-1.2.2.tgz` from the GitHub Release and use “Plugins → Add plugin”
+Alternatively, download `dsh-quickdesk-1.2.3.tgz` from the GitHub Release and use “Plugins → Add plugin”
 in DSH, or install from a local checkout (run inside the repository root; replacing `.` with the clone path also works):
 
 ```powershell
@@ -90,7 +90,7 @@ dsh plugin --profile desktop add .
 ## Release notes
 
 - Changelog: [CHANGELOG.md](https://github.com/aofchas/dsh-quickdesk/blob/main/CHANGELOG.md)
-- 1.2.2 release notes: [docs/release-notes/1.2.2.md](https://github.com/aofchas/dsh-quickdesk/blob/main/docs/release-notes/1.2.2.md)
+- 1.2.3 release notes: [docs/release-notes/1.2.3.md](https://github.com/aofchas/dsh-quickdesk/blob/main/docs/release-notes/1.2.3.md)
 
 ## Configuration
 
@@ -130,7 +130,7 @@ To lock defaults, distribute in bulk or run GitOps, you can still replace the wh
 
 | Field | Default | Purpose |
 |---|---|---|
-| `hotkey` | `Ctrl+Alt+Space` | Summon / hide the input box (Ctrl/Alt/Shift/Win plus letters/digits/F1–F24/Space etc.) |
+| `hotkey` | `Ctrl+Alt+Space` | Summon / hide the input box (single keys or Ctrl/Alt/Shift combinations; capture it directly in Settings) |
 | `submitKey` | `Enter` | Submit the task (combinations such as `Ctrl+Enter` are allowed) |
 | `cancelKey` | `Escape` | Close the input box |
 | `approveKey` | `Enter` | Approve in the approval popup |
@@ -244,6 +244,7 @@ node --check client.js   # settings-page client syntax
 - The HUD tracks the most recent QuickDesk task; with concurrent tasks it shows the latest one.
 - Hitting the step budget cancels the turn without a completion message; raise `maxSteps` for complex tasks.
 - Only one session may operate the desktop at a time (the computer-use plugin’s own mutex); tasks from other sessions fail with a hint.
+- System-level hotkey conflicts cannot be fully detected before saving; if sidecar registration fails, the HUD and `launcher.log` report it.
 - Built-in copy is Chinese and English only; other system languages fall back to English.
 
 ## Security

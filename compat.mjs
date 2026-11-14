@@ -15,7 +15,7 @@ import { randomUUID } from 'node:crypto';
 
 export const TESTED_WITH = Object.freeze({
   dsh: '0.2.2-rc.3',
-  quickdesk: '1.2.2',
+  quickdesk: '1.2.3',
   computerUsePlugin: 'dsh-computer-use-win 0.5.6 (optional; not imported)'
 });
 

@@ -17,6 +17,7 @@
     "budgetStop": "已停止 · 超过 {{max}} 步上限",
     "launchFailed": "启动失败：{{error}}",
     "overlayHint": "提示：未能关闭 computer-use 浮窗/接管提示",
+    "hotkeyUnavailable": "快捷键 {{hotkey}} 注册失败，可能已被其它程序占用",
     "backendMissing": "未检测到桌面操控工具 · 请先安装 dsh-computer-use-win",
     "approvalTitle": "QuickDesk · 需要你审批",
     "approvalFormTitle": "QuickDesk 审批",

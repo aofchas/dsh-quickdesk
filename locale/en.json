@@ -17,6 +17,7 @@
     "budgetStop": "Stopped · over the {{max}}-step budget",
     "launchFailed": "Failed to start: {{error}}",
     "overlayHint": "Note: could not turn off the computer-use overlay",
+    "hotkeyUnavailable": "Hotkey {{hotkey}} could not be registered; another app may already use it",
     "backendMissing": "No desktop tools detected · install dsh-computer-use-win first",
     "approvalTitle": "QuickDesk · approval needed",
     "approvalFormTitle": "QuickDesk approval",
