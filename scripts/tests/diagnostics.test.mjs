@@ -75,8 +75,8 @@ try {
   assert.equal(payload.ok, true, `collector reported failure: ${JSON.stringify(payload)}`);
   assert.equal(payload.canceled, false);
   assert.equal(
-    realpathSync(payload.zip).toLowerCase(),
-    realpathSync(zipPath).toLowerCase(),
+    realpathSync.native(payload.zip).toLowerCase(),
+    realpathSync.native(zipPath).toLowerCase(),
     'collector should return the requested zip path (canonicalized for 8.3 TEMP paths)'
   );
   assert.equal(payload.tempRemoved, true, 'temporary collection folder must be removed after zipping');
