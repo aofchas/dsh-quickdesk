@@ -11,6 +11,7 @@ import {
   mkdtempSync,
   readFileSync,
   readdirSync,
+  realpathSync,
   rmSync,
   statSync
 } from 'node:fs';
@@ -73,7 +74,11 @@ try {
   const payload = JSON.parse(markerLine.slice(marker.length));
   assert.equal(payload.ok, true, `collector reported failure: ${JSON.stringify(payload)}`);
   assert.equal(payload.canceled, false);
-  assert.equal(payload.zip, zipPath);
+  assert.equal(
+    realpathSync(payload.zip).toLowerCase(),
+    realpathSync(zipPath).toLowerCase(),
+    'collector should return the requested zip path (canonicalized for 8.3 TEMP paths)'
+  );
   assert.equal(payload.tempRemoved, true, 'temporary collection folder must be removed after zipping');
   assert.equal(existsSync(payload.temp), false, `temporary folder still exists: ${payload.temp}`);
   assert.ok(existsSync(zipPath), 'report zip was not written');
