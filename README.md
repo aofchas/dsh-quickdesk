@@ -66,8 +66,6 @@ language, task protocol and the status HUD are all editable on the **DSH setting
 - **装得上、看得见、停得下**：DSH 设置页可视化配置；单行 HUD 显示步数/耗时；审批弹窗把不可逆操作交回给你。
 - **不绑架其他插件**：不 import、不修改 computer-use 插件，也不偷偷改别人的设置；桌面后端缺失时明确提示。
 
-完整的市场提交文案（中英双语、分类/标签/权限说明/对比表）见 [docs/market-copy.md](docs/market-copy.md)。
-
 ## 界面
 
 设置 → Plugins → QuickDesk，所有选项可视化编辑：
@@ -102,12 +100,10 @@ dsh plugin --profile desktop add .
 
 安装/升级后**完全退出并重启 DSH**。重启后在「设置 → Plugins → QuickDesk」里可视化调整所有选项。
 
-## 发布
+## 版本与变更
 
 - 变更记录：[CHANGELOG.md](https://github.com/aofchas/dsh-quickdesk/blob/main/CHANGELOG.md)
-- 本版本双语文案：[docs/release-notes/1.2.1.md](https://github.com/aofchas/dsh-quickdesk/blob/main/docs/release-notes/1.2.1.md)
-- 发布流程与市场提交：[docs/PUBLISHING.md](https://github.com/aofchas/dsh-quickdesk/blob/main/docs/PUBLISHING.md)
-- 市场提交文案（中英）：[docs/market-copy.md](https://github.com/aofchas/dsh-quickdesk/blob/main/docs/market-copy.md)
+- 1.2.1 发布说明：[docs/release-notes/1.2.1.md](https://github.com/aofchas/dsh-quickdesk/blob/main/docs/release-notes/1.2.1.md)
 
 ## 配置
 
@@ -239,7 +235,7 @@ UIA 使用手册：[skills/uia/SKILL.md](skills/uia/SKILL.md)（工具映射、U
 ## 开发与自检
 
 ```powershell
-npm test                    # 发布门禁：编码、PowerShell 解析/GB2312、模块、包内容、诊断、sidecar 运行时
+npm test                    # 完整测试：编码、PowerShell 解析/GB2312、模块、包内容、诊断、sidecar 运行时
 npm run test:unit           # 44 项离线自检
 node --check client.js      # 设置页客户端语法检查
 ```

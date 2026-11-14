@@ -53,8 +53,6 @@ For the same “let the AI operate my desktop” job, QuickDesk targets the two 
 - **Installable, visible, stoppable**: visual configuration in the DSH settings page; the HUD shows steps and elapsed time; the approval popup hands irreversible actions back to you.
 - **No hijacking of other plugins**: QuickDesk never imports or modifies the computer-use plugin and never silently changes another plugin’s settings; a missing desktop backend is reported explicitly.
 
-The full market-submission copy (bilingual, categories/tags/permissions/comparison table) lives in [docs/market-copy.md](docs/market-copy.md).
-
 ## Screenshots
 
 Settings → Plugins → QuickDesk — every option is editable from the UI:
@@ -89,12 +87,10 @@ dsh plugin --profile desktop add .
 
 **Fully quit and restart DSH** after installing or upgrading. Then open Settings → Plugins → QuickDesk to configure everything visually.
 
-## Publishing
+## Release notes
 
 - Changelog: [CHANGELOG.md](CHANGELOG.md)
-- This release's bilingual notes: [docs/release-notes/1.2.1.md](docs/release-notes/1.2.1.md)
-- Release process and market submission: [docs/PUBLISHING.md](docs/PUBLISHING.md)
-- Market copy (zh/en): [docs/market-copy.md](docs/market-copy.md)
+- 1.2.1 release notes: [docs/release-notes/1.2.1.md](docs/release-notes/1.2.1.md)
 
 ## Configuration
 
@@ -226,7 +222,7 @@ Microsoft docs links) that you can provide to sessions or use as a team conventi
 ## Development and self-test
 
 ```powershell
-npm test                 # publish gate: encoding, PowerShell parse/GB2312, module, package, diagnostics, sidecar runtime
+npm test                 # full suite: encoding, PowerShell parse/GB2312, module, package, diagnostics, sidecar runtime
 npm run test:unit        # 44 offline checks
 node --check client.js   # settings-page client syntax
 ```
