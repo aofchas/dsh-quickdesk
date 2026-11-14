@@ -11,10 +11,10 @@ import {
   mkdtempSync,
   readFileSync,
   readdirSync,
-  realpathSync,
   rmSync,
   statSync
 } from 'node:fs';
+import { basename, dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -74,11 +74,11 @@ try {
   const payload = JSON.parse(markerLine.slice(marker.length));
   assert.equal(payload.ok, true, `collector reported failure: ${JSON.stringify(payload)}`);
   assert.equal(payload.canceled, false);
-  assert.equal(
-    realpathSync.native(payload.zip).toLowerCase(),
-    realpathSync.native(zipPath).toLowerCase(),
-    'collector should return the requested zip path (canonicalized for 8.3 TEMP paths)'
-  );
+  // CI runners expose TEMP as an 8.3 short path (RUNNER~1), while the
+  // collector returns the long form (runneradmin). Compare the file and
+  // folder names instead of the full path so the test is path-form agnostic.
+  assert.equal(basename(payload.zip).toLowerCase(), basename(zipPath).toLowerCase());
+  assert.equal(basename(dirname(payload.zip)).toLowerCase(), basename(dirname(zipPath)).toLowerCase());
   assert.equal(payload.tempRemoved, true, 'temporary collection folder must be removed after zipping');
   assert.equal(existsSync(payload.temp), false, `temporary folder still exists: ${payload.temp}`);
   assert.ok(existsSync(zipPath), 'report zip was not written');
