@@ -71,7 +71,7 @@ provides desktop tools (recommended: [`dsh-computer-use-win`](https://github.com
 Install from npm (recommended):
 
 ```powershell
-# Web profile (this is the command the DSH plugin market uses)
+# Web profile (common)
 dsh plugin --profile web add dsh-quickdesk
 
 # DSH Desktop can also install into the desktop profile

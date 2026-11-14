@@ -84,7 +84,7 @@ computer-use 插件（推荐 [`dsh-computer-use-win`](https://github.com/yu-tao-
 从 npm 安装（推荐）：
 
 ```powershell
-# Web profile（DSH 插件市场一键安装用的就是这条命令）
+# Web profile（常用）
 dsh plugin --profile web add dsh-quickdesk
 
 # DSH Desktop 也可以装到 desktop profile
