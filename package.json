@@ -59,8 +59,6 @@
     "scripts/launcher.ps1",
     "scripts/approval-popup.ps1",
     "scripts/collect-diagnostics.ps1",
-    "scripts/selftest.mjs",
-    "scripts/verify-release.mjs",
     "locale/*.json",
     "icon.svg",
     "skills/**",

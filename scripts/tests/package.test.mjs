@@ -110,6 +110,8 @@ check('development-only files are not shipped in the package', () => {
     'scripts/tests/encoding.test.mjs',
     'scripts/collect-diagnostics.cmd',
     'scripts/QuickDesk-Diagnostics.zip',
+    'scripts/selftest.mjs',
+    'scripts/verify-release.mjs',
     'package-lock.json',
     'docs/PUBLISHING.md',
     'docs/TESTING.md',
