@@ -110,7 +110,11 @@ check('development-only files are not shipped in the package', () => {
     'scripts/tests/encoding.test.mjs',
     'scripts/collect-diagnostics.cmd',
     'scripts/QuickDesk-Diagnostics.zip',
-    'package-lock.json'
+    'package-lock.json',
+    'docs/PUBLISHING.md',
+    'docs/TESTING.md',
+    'docs/market-copy.md',
+    'docs/release-notes/1.2.1.md'
   ];
   for (const relativePath of forbidden) {
     assert.equal(coveredByFiles(relativePath), false, `files[] must not include ${relativePath}`);
@@ -155,6 +159,11 @@ check('npm pack contains the runtime files and no dev/test files', () => {
       `test file ${relativePath} must not be packed`
     );
     assert.equal(relativePath.endsWith('.tgz'), false, `tarball ${relativePath} must not be packed`);
+    assert.equal(
+      /^docs\/.*\.md$/.test(relativePath),
+      false,
+      `internal documentation ${relativePath} must not be published`
+    );
   }
 });
 

@@ -89,8 +89,8 @@ dsh plugin --profile desktop add .
 
 ## Release notes
 
-- Changelog: [CHANGELOG.md](CHANGELOG.md)
-- 1.2.1 release notes: [docs/release-notes/1.2.1.md](docs/release-notes/1.2.1.md)
+- Changelog: [CHANGELOG.md](https://github.com/aofchas/dsh-quickdesk/blob/main/CHANGELOG.md)
+- 1.2.1 release notes: [docs/release-notes/1.2.1.md](https://github.com/aofchas/dsh-quickdesk/blob/main/docs/release-notes/1.2.1.md)
 
 ## Configuration
 
@@ -176,7 +176,7 @@ Settings → Plugins → QuickDesk → **Diagnostics and support** → **Run dia
   powershell -NoProfile -ExecutionPolicy Bypass -File "<plugin dir>\scripts\collect-diagnostics.ps1" -OutputZip "C:\Temp\QuickDesk-Diagnostics.zip"
   ```
 
-## Step and token optimization (since v1.0.3)
+## Step and token optimization
 
 Measured on the same “search YouTube for IM LS8 Neo” task, the old QuickDesk used **53 tool calls**: the search was done at step 10, and the next 30+ steps were `screenshot` + `read_image` pairs (12 screenshots, 12 image reads) plus `scroll` / `grep` / `pwsh`, all to write a page summary.
 

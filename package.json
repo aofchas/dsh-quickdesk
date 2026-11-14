@@ -64,7 +64,6 @@
     "locale/*.json",
     "icon.svg",
     "skills/**",
-    "docs/*.md",
     "docs/assets/*.png",
     "CHANGELOG.md",
     "SECURITY.md",

@@ -7,7 +7,7 @@ change, or at most a one-file change.
 
 | Component | Version |
 |---|---|
-| QuickDesk | 1.2.0 |
+| QuickDesk | 1.2.1 |
 | DeepSeek Harness Desktop | 0.2.2-rc.3 |
 | `@deepseek-ai/dsh` runtime | 0.2.2-rc.3 |
 | `dsh-computer-use-win` (optional, not imported) | 0.5.6 |
@@ -81,30 +81,6 @@ that drops schema projection only loses the settings page.
 - The PowerShell sidecars receive the localized strings as UTF-8/base64
   parameters (input box, hint, brand, placeholder) or inside the approval
   payload (title, hint, button labels), so no copy is duplicated in C#/PS code.
-
-## 1.1.0 → 1.2.0 upgrade note
-
-- QuickDesk now ships a settings page: Host `Config` schema (all fields
-  `.volatile()`) + `client.js`. After upgrading, restart DSH once so the new
-  Host module and client bundle load; then open Settings → Plugins → QuickDesk.
-- Saving a field writes through the config editor into the profile patch and is
-  applied live by the Host's committed-config poll (no plugin remount). Hotkey or
-  status-corner edits restart the sidecar (about 1 second).
-- Existing `cordis.patch.yml` values keep working as the inherited defaults; the
-  first UI save creates a profile-level override for the fields it writes.
-
-## 1.0.x → 1.1.0 upgrade note
-
-- The 1.0.x package shipped a `client.js` half that unconditionally wrote three
-  `windows-computer-use` settings to hide that plugin's overlay. A client module
-  cannot read QuickDesk's own config, so the write could not honour
-  `disableComputerUseUi: false`. It was removed in 1.1.0; the same switches can
-  be set in the computer-use settings page, or opt in to the host-side
-  best-effort via `disableComputerUseUi: true`.
-- No other capability depended on the client half. Live sessions that still
-  have the old client module loaded unload it on the next page refresh/restart.
-- `defaultPrompt` now defaults to empty (built-in localized protocol). Existing
-  profiles that set their own `defaultPrompt` keep using it verbatim.
 
 ## Computer-use plugin independence
 

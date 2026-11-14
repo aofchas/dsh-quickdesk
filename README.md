@@ -190,7 +190,7 @@ dsh plugin --profile desktop add .
   powershell -NoProfile -ExecutionPolicy Bypass -File "<插件目录>\scripts\collect-diagnostics.ps1" -OutputZip "C:\Temp\QuickDesk-Diagnostics.zip"
   ```
 
-## 步数与 token 优化（v1.0.3 起）
+## 步数与 token 优化
 
 实测：同一个「用 YouTube 搜索 智己LS8 Neo」任务，旧版 QuickDesk 跑了 **53 次工具调用**——搜索在第 10 步就完成了，后面 30 多步全是 `screenshot` + `read_image` 成对调用（12 张截图、12 次读图）以及 `scroll` / `grep` / `pwsh`，只为给页面内容写总结。
 
