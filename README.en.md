@@ -78,7 +78,7 @@ dsh plugin --profile web add dsh-quickdesk
 dsh plugin --profile desktop add dsh-quickdesk
 ```
 
-Alternatively, download `dsh-quickdesk-1.2.1.tgz` from the GitHub Release and use “Plugins → Add plugin”
+Alternatively, download `dsh-quickdesk-1.2.2.tgz` from the GitHub Release and use “Plugins → Add plugin”
 in DSH, or install from a local checkout (run inside the repository root; replacing `.` with the clone path also works):
 
 ```powershell
@@ -90,7 +90,7 @@ dsh plugin --profile desktop add .
 ## Release notes
 
 - Changelog: [CHANGELOG.md](https://github.com/aofchas/dsh-quickdesk/blob/main/CHANGELOG.md)
-- 1.2.1 release notes: [docs/release-notes/1.2.1.md](https://github.com/aofchas/dsh-quickdesk/blob/main/docs/release-notes/1.2.1.md)
+- 1.2.2 release notes: [docs/release-notes/1.2.2.md](https://github.com/aofchas/dsh-quickdesk/blob/main/docs/release-notes/1.2.2.md)
 
 ## Configuration
 

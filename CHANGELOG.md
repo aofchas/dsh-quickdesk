@@ -4,7 +4,7 @@ All notable changes to QuickDesk are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.2.2] - 2026-11-14
 
 ### Added
 - The Hotkey field in Settings can capture a combination directly: click
@@ -15,7 +15,15 @@ All notable changes to QuickDesk are documented here. The format follows
 
 ### Changed
 - README no longer presents the default `Ctrl+Alt+Space` as the only way to
-  summon QuickDesk; it points at the configured hotkey instead.
+  summon QuickDesk; it points at the configured hotkey instead. Both the Chinese
+  and English quick-start sections are present.
+- Public history now starts at 1.2.0; CHANGELOG, COMPATIBILITY and README no
+  longer expose pre-1.2 internal version milestones.
+
+### Fixed
+- The npm tarball no longer ships maintainer-only documentation
+  (`docs/PUBLISHING.md`, `docs/TESTING.md`, `docs/market-copy.md`, release
+  notes) or maintainer scripts (`selftest.mjs`, `verify-release.mjs`).
 
 ## [1.2.1] - 2026-11-14
 
