@@ -19,6 +19,16 @@
 “global hotkey → one-sentence task → desktop computer-use execution” loop as a standalone plugin: shortcuts,
 language, task protocol and the status HUD are all editable on the **DSH settings page** — no YAML editing required.
 
+### 中文快速开始
+
+- **平台**：仅 Windows 10/11（PowerShell 5.1 + WinForms）。
+- **环境**：DSH Desktop 0.2.2-rc.3（rc.1 及以上）。
+- **依赖**：`dsh-computer-use-win` 或其它提供桌面工具的 computer-use 插件。
+- **安装**：`dsh plugin --profile web add dsh-quickdesk`，完成后完全退出并重启 DSH。
+- **配置**：设置 → Plugins → QuickDesk；修改即时生效，无需手改 YAML。
+- **诊断**：设置 → Plugins → QuickDesk → 诊断与支持，选择报告 zip 的保存位置。
+- **完整指南**：见本页下方「安装」与「配置」章节。
+
 ### English quick start
 
 - **Platform**: Windows 10/11 only (PowerShell 5.1 + WinForms).
@@ -27,15 +37,6 @@ language, task protocol and the status HUD are all editable on the **DSH setting
 - **Configure**: Settings → Plugins → QuickDesk; changes apply live, no YAML editing.
 - **Diagnostics**: Settings → Plugins → QuickDesk → Diagnostics and support; choose where to save the report zip.
 - **Full English guide**: [README.en.md](https://github.com/aofchas/dsh-quickdesk/blob/main/README.en.md).
-
-> **平台 Platform**：Windows 10/11 + PowerShell 5.1（仅 Windows · Windows-only）
->
-> **环境 Environment**：DSH Desktop 0.2.2-rc.3 实测（rc.1 及以上）· tested with DSH Desktop 0.2.2-rc.3 (rc.1+)
->
-> **依赖 Requires**：[`dsh-computer-use-win`](https://github.com/yu-tao-li/dsh-computer-use-win) 或其它提供桌面工具的
-> computer-use 插件，作为桌面执行后端 · a desktop computer-use provider is required
-
-> 仓库：<https://github.com/aofchas/dsh-quickdesk>（Windows 专用，PowerShell 5.1 + WinForms）
 
 ## 功能
 
