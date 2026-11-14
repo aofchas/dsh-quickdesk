@@ -275,5 +275,5 @@ node --check client.js      # 设置页客户端语法检查
 本项目采用 **MIT License** 开源，允许自由使用、修改、分发和商用，保留版权与许可声明即可。
 
 - 完整许可文本：[LICENSE](https://github.com/aofchas/dsh-quickdesk/blob/main/LICENSE)
-- 版权归属：Copyright (c) 2026 aofchas (aofchas)
+- 版权归属：Copyright (c) 2026 aofchas
 - 第三方说明：QuickDesk 不捆绑第三方运行时代码；运行时依赖的 DeepSeek Harness 及其客户端包遵循各自许可证，见 `THIRD_PARTY` 相关上游文档。

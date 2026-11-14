@@ -261,5 +261,5 @@ node --check client.js   # settings-page client syntax
 QuickDesk is released under the **MIT License**: you may use, modify, distribute and sell it freely, provided the copyright and license notice are kept.
 
 - Full license text: [LICENSE](LICENSE)
-- Copyright: Copyright (c) 2026 aofchas (aofchas)
+- Copyright: Copyright (c) 2026 aofchas
 - Third-party notes: QuickDesk bundles no third-party runtime code; DeepSeek Harness and its client packages used at runtime follow their own licenses (see the corresponding upstream documentation).
