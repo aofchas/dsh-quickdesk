@@ -22,3 +22,7 @@ Thumbs.db
 .env
 .env.*
 *.local
+
+# Maintainer-only development notes (kept locally, not in the public repo)
+docs/PUBLISHING.md
+docs/market-copy.md
