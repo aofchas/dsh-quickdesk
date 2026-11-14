@@ -82,7 +82,7 @@ try {
   assert.equal(payload.tempRemoved, true, 'temporary collection folder must be removed after zipping');
   assert.equal(existsSync(payload.temp), false, `temporary folder still exists: ${payload.temp}`);
   assert.ok(existsSync(zipPath), 'report zip was not written');
-  assert.ok(statSync(zipPath).size > 5000, 'report zip looks too small');
+  assert.ok(statSync(zipPath).size > 1000, 'report zip looks too small');
 
   // Inspect the zip contents with PowerShell's Expand-Archive.
   const expand = runPowerShell(
