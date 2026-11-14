@@ -92,7 +92,7 @@ dsh plugin --profile web add dsh-quickdesk
 dsh plugin --profile desktop add dsh-quickdesk
 ```
 
-也可以从 GitHub Release 下载 `dsh-quickdesk-1.2.3.tgz`，在 DSH「插件 → 添加插件」中选择安装，
+也可以从 GitHub Release 下载 `dsh-quickdesk-1.2.4.tgz`，在 DSH「插件 → 添加插件」中选择安装，
 或从本地源码目录安装（在仓库根目录执行，把 `.` 换成实际克隆目录也可以）：
 
 ```powershell
@@ -104,7 +104,7 @@ dsh plugin --profile desktop add .
 ## 版本与变更
 
 - 变更记录：[CHANGELOG.md](https://github.com/aofchas/dsh-quickdesk/blob/main/CHANGELOG.md)
-- 1.2.3 发布说明：[docs/release-notes/1.2.3.md](https://github.com/aofchas/dsh-quickdesk/blob/main/docs/release-notes/1.2.3.md)
+- 1.2.4 发布说明：[docs/release-notes/1.2.4.md](https://github.com/aofchas/dsh-quickdesk/blob/main/docs/release-notes/1.2.4.md)
 
 ## 配置
 
