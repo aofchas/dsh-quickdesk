@@ -14,7 +14,7 @@ import {
   rmSync,
   statSync
 } from 'node:fs';
-import { basename, dirname, join } from 'node:path';
+import { basename } from 'node:path';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
