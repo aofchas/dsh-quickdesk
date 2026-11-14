@@ -26,7 +26,7 @@ shortcuts, language, task protocol and status HUD are all editable on the **DSH 
 
 ## Features
 
-1. **Global hotkey**: `Ctrl+Alt+Space` by default. All five shortcuts (summon, submit, cancel, approve, reject) can be captured in Settings with “Press shortcut…” using a single key or a Ctrl/Alt/Shift combination. Risky single keys show a warning; same-group conflicts block saving with a “Swap both” option, while a summon-hotkey conflict cannot be saved. Click the button again or click elsewhere to cancel recording; Esc is captured as a normal key. Press the configured hotkey to summon the input box, submit with the configured key, close with the cancel key.
+1. **One sentence to operate the computer**: press the summon hotkey (default `Ctrl+Alt+Space`), type one sentence, and QuickDesk finishes the task on your visible desktop, replying with one line by default.
 2. **DSH settings page**: Settings → Plugins → QuickDesk lets you edit shortcuts, language, status HUD, workspace, task protocol, step budget and approval options; saving writes into the active profile configuration, so you never edit `cordis.patch.yml` by hand.
 3. **Completion-first task protocol**: every task is prefixed with built-in instructions (chosen from `locale/<language>.json` → `prompt`):
    - **Stop when done**: once the requested state exists (results page loaded / text typed / file saved), stop — no more scrolling, screenshots or page reading;
