@@ -17,6 +17,8 @@ shortcuts, language, task protocol and status HUD are all editable on the **DSH 
 
 > **Platform**: Windows 10/11 + PowerShell 5.1 (Windows-only)
 >
+> **Environment**: DSH Desktop 0.2.2-rc.3 tested (rc.1 or newer)
+>
 > **Requires**: [`dsh-computer-use-win`](https://github.com/yu-tao-li/dsh-computer-use-win) or another computer-use
 > provider that exposes desktop tools, as the desktop execution backend
 
@@ -37,6 +39,7 @@ shortcuts, language, task protocol and status HUD are all editable on the **DSH 
 6. **Approval popup**: confirmation requests appear in the bottom-right corner; Enter approves, Backspace rejects by default, and both keys are configurable.
 7. **Desktop-backend self-check**: before submitting a task, QuickDesk verifies that desktop computer-use tools are registered; if `dsh-computer-use-win` (or another desktop provider) is missing, it shows a hint instead of burning a session.
 8. **Auto review preset for new sessions**; tasks are created in the default workspace.
+9. **One-click diagnostics in Settings**: Settings → Plugins → QuickDesk → Diagnostics and support lets you choose where to save a report zip; it collects the environment, DSH profiles, `launcher.log`, sidecar state, PowerShell prerequisites and recent DSH logs, then deletes the temporary collection folder.
 
 ## Why QuickDesk
 
@@ -58,11 +61,13 @@ Settings → Plugins → QuickDesk — every option is editable from the UI:
 
 ![QuickDesk settings page](docs/assets/settings-page.png)
 
+![Diagnostics and support](docs/assets/settings-page-diagnostics.png)
+
 ![Approvals and permissions](docs/assets/settings-page-approvals.png)
 
 ## Installation
 
-Requirements: Windows 10/11, PowerShell 5.1, DSH (`web` or `desktop` profile), and a computer-use plugin that
+Requirements: Windows 10/11, PowerShell 5.1, DSH (`web` or `desktop` profile; tested with 0.2.2-rc.3, rc.1 or newer), and a computer-use plugin that
 provides desktop tools (recommended: [`dsh-computer-use-win`](https://github.com/yu-tao-li/dsh-computer-use-win)).
 
 Install from npm (recommended):
@@ -75,7 +80,7 @@ dsh plugin --profile web add dsh-quickdesk
 dsh plugin --profile desktop add dsh-quickdesk
 ```
 
-Alternatively, download `dsh-quickdesk-1.2.0.tgz` from the GitHub Release and use “Plugins → Add plugin”
+Alternatively, download `dsh-quickdesk-1.2.1.tgz` from the GitHub Release and use “Plugins → Add plugin”
 in DSH, or install from a local checkout (run inside the repository root; replacing `.` with the clone path also works):
 
 ```powershell
@@ -87,6 +92,7 @@ dsh plugin --profile desktop add .
 ## Publishing
 
 - Changelog: [CHANGELOG.md](CHANGELOG.md)
+- This release's bilingual notes: [docs/release-notes/1.2.1.md](docs/release-notes/1.2.1.md)
 - Release process and market submission: [docs/PUBLISHING.md](docs/PUBLISHING.md)
 - Market copy (zh/en): [docs/market-copy.md](docs/market-copy.md)
 
@@ -151,8 +157,9 @@ To lock defaults, distribute in bulk or run GitOps, you can still replace the wh
 | `autoPresetNewSessions` | `true` | Apply the Auto review permission preset to new sessions |
 | `autoPresetName` | `auto` | Permission preset name |
 | `disableComputerUseUi` | `false` | Optional: try to turn off computer-use-win’s overlay/takeover hint via the DSH settings service (host-side best effort, off by default) |
+| `diagnosticsRequest` | empty | Host-owned: request token written by the settings-page button (do not edit) |
 
-> Every field above can be edited directly in the DSH settings page; this table documents defaults, ranges and semantics for distribution defaults and troubleshooting.
+> Every field above can be edited directly in the DSH settings page; this table documents defaults, ranges and semantics for distribution defaults and troubleshooting. `diagnosticsRequest` is maintained by the settings-page button and normally needs no manual edits.
 
 ### Language and copy
 
@@ -161,6 +168,17 @@ To lock defaults, distribute in bulk or run GitOps, you can still replace the wh
 - The settings page copy lives in `dictionaries` inside [`client.js`](client.js) (also zh/en) and follows the same wording.
 - Adding a language: copy `locale/en.json` to `locale/xx.json`, set `language: xx`, and register it in `LANGUAGES` in `quickdesk.mjs` and in `dictionaries` in `client.js`.
 - Custom task protocol: write it in the settings page’s “Task protocol” field, or set `defaultPrompt: |` in the profile patch; `{{MAX_STEPS}}` is replaced with the current `maxSteps`.
+
+### Diagnostics and support
+
+Settings → Plugins → QuickDesk → **Diagnostics and support** → **Run diagnostics...**. A native Save-As dialog lets you choose where to store the report zip; after a successful zip, the temporary collection folder is deleted automatically.
+
+- The report contains the environment and encoding, DSH versions and profiles, the QuickDesk install, `launcher.log`, sidecar processes, PowerShell/Add-Type/mutex/hidden-startup tests, the plugin module import result and recent DSH log excerpts.
+- The report can contain local paths, user names and process command lines. Treat it as private and share it only with the developer.
+- Command-line alternative (`<plugin dir>` = `node_modules/dsh-quickdesk` in the profile):
+  ```powershell
+  powershell -NoProfile -ExecutionPolicy Bypass -File "<plugin dir>\scripts\collect-diagnostics.ps1" -OutputZip "C:\Temp\QuickDesk-Diagnostics.zip"
+  ```
 
 ## Step and token optimization (since v1.0.3)
 
@@ -208,8 +226,9 @@ Microsoft docs links) that you can provide to sessions or use as a team conventi
 ## Development and self-test
 
 ```powershell
-node scripts/selftest.mjs   # 44 offline checks: copy parity, language resolution, protocol rendering, step budget, cancel API, desktop tool detection, Config schema and settings-page wiring
-node --check client.js      # settings page client syntax
+npm test                 # publish gate: encoding, PowerShell parse/GB2312, module, package, diagnostics, sidecar runtime
+npm run test:unit        # 44 offline checks
+node --check client.js   # settings-page client syntax
 ```
 
 ## When the hotkey does not work
@@ -219,6 +238,7 @@ node --check client.js      # settings page client syntax
   - after pressing the hotkey you should see `hotkey fired via ...` and `input shown`; if not, the key never reached QuickDesk (common causes: the foreground window is elevated, an IME/keyboard tool intercepted it, or the sidecar is restarting with the plugin).
 - QuickDesk requires DSH to run; after DSH exits the global hotkey is unavailable.
 - On conflicts, change `hotkey:` in `cordis.patch.yml` (e.g. `Ctrl+Alt+K`) and reload/restart DSH.
+- If you still cannot locate the problem, use Settings → Plugins → QuickDesk → Diagnostics and support → Run diagnostics and send the report to the developer.
 
 ## Known limitations
 

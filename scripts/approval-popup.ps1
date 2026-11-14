@@ -93,7 +93,7 @@ function New-RoundedPath([System.Drawing.Rectangle]$bounds, [int]$radius) {
 }
 
 $script:form = New-Object System.Windows.Forms.Form
-$script:form.Text = Get-QuickDeskText 'formTitle' 'QuickDesk 审批'
+$script:form.Text = Get-QuickDeskText 'formTitle' 'QuickDesk Approval'
 $script:form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::None
 $script:form.StartPosition = [System.Windows.Forms.FormStartPosition]::Manual
 $script:form.TopMost = $true
@@ -106,7 +106,7 @@ $script:form.Opacity = 0.0
 $script:title = New-Object System.Windows.Forms.Label
 $script:title.AutoSize = $false
 $script:title.Bounds = New-Object System.Drawing.Rectangle(24, 18, 452, 30)
-$script:title.Text = Get-QuickDeskText 'title' 'QuickDesk · 需要你审批'
+$script:title.Text = Get-QuickDeskText 'title' 'QuickDesk - Approval required'
 $script:title.Font = New-Object System.Drawing.Font('Microsoft YaHei UI', 13.5, [System.Drawing.FontStyle]::Bold)
 $script:title.ForeColor = [System.Drawing.Color]::FromArgb(236, 239, 245)
 $script:title.BackColor = [System.Drawing.Color]::Transparent
@@ -131,14 +131,14 @@ $script:reason.AutoEllipsis = $true
 $script:hint = New-Object System.Windows.Forms.Label
 $script:hint.AutoSize = $false
 $script:hint.Bounds = New-Object System.Drawing.Rectangle(24, 178, 452, 22)
-$script:hint.Text = Get-QuickDeskText 'hint' "$(Format-KeyLabel $approveKey) 通过    $(Format-KeyLabel $rejectKey) 拒绝    超时自动拒绝"
+$script:hint.Text = Get-QuickDeskText 'hint' "$(Format-KeyLabel $approveKey) approve    $(Format-KeyLabel $rejectKey) reject    auto-reject on timeout"
 $script:hint.Font = New-Object System.Drawing.Font('Microsoft YaHei UI', 9)
 $script:hint.ForeColor = [System.Drawing.Color]::FromArgb(140, 146, 158)
 $script:hint.BackColor = [System.Drawing.Color]::Transparent
 
 $script:approveButton = New-Object System.Windows.Forms.Button
 $script:approveButton.Bounds = New-Object System.Drawing.Rectangle(24, 208, 214, 36)
-$script:approveButton.Text = Get-QuickDeskText 'approve' "通过  ($(Format-KeyLabel $approveKey))"
+$script:approveButton.Text = Get-QuickDeskText 'approve' "Approve  ($(Format-KeyLabel $approveKey))"
 $script:approveButton.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
 $script:approveButton.FlatAppearance.BorderSize = 1
 $script:approveButton.FlatAppearance.BorderColor = [System.Drawing.Color]::FromArgb(60, 130, 100)
@@ -148,7 +148,7 @@ $script:approveButton.Font = New-Object System.Drawing.Font('Microsoft YaHei UI'
 
 $script:rejectButton = New-Object System.Windows.Forms.Button
 $script:rejectButton.Bounds = New-Object System.Drawing.Rectangle(262, 208, 214, 36)
-$script:rejectButton.Text = Get-QuickDeskText 'reject' "拒绝  ($(Format-KeyLabel $rejectKey))"
+$script:rejectButton.Text = Get-QuickDeskText 'reject' "Reject  ($(Format-KeyLabel $rejectKey))"
 $script:rejectButton.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
 $script:rejectButton.FlatAppearance.BorderSize = 1
 $script:rejectButton.FlatAppearance.BorderColor = [System.Drawing.Color]::FromArgb(130, 70, 80)

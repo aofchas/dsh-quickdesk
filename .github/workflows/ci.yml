@@ -22,22 +22,7 @@ jobs:
           node --check compat.mjs
           node --check scripts/selftest.mjs
           node --check scripts/verify-release.mjs
-      - name: Offline self-test
-        run: node scripts/selftest.mjs
-      - name: Release metadata gate
-        run: node scripts/verify-release.mjs
-      - name: PowerShell sidecar syntax
-        shell: pwsh
-        run: |
-          $failed = $false
-          foreach ($file in @('scripts/launcher.ps1', 'scripts/approval-popup.ps1')) {
-            $errors = $null
-            [void][System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file), [ref]$null, [ref]$errors)
-            if ($errors.Count -gt 0) {
-              $failed = $true
-              $errors | ForEach-Object { Write-Error "$file $($_.Extent.StartLineNumber): $($_.Message)" }
-            }
-          }
-          if ($failed) { exit 1 }
+      - name: Test suite (publish gate)
+        run: npm test
       - name: Pack contents
         run: npm pack --dry-run

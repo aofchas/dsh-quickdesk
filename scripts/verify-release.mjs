@@ -26,9 +26,13 @@ const required = [
   'cordis.patch.yml',
   'scripts/launcher.ps1',
   'scripts/approval-popup.ps1',
+  'scripts/collect-diagnostics.ps1',
   'locale/zh.json',
   'locale/en.json',
   'icon.svg',
+  'docs/assets/settings-page.png',
+  'docs/assets/settings-page-diagnostics.png',
+  'docs/assets/settings-page-approvals.png',
   'README.md',
   'COMPATIBILITY.md',
   'LICENSE'
@@ -78,7 +82,7 @@ check('required files exist', () => {
 });
 check('files whitelist covers the runtime', () => {
   const files = manifest.files || [];
-  for (const relative of ['quickdesk.mjs', 'client.js', 'compat.mjs', 'cordis.patch.yml', 'scripts/launcher.ps1', 'scripts/approval-popup.ps1', 'locale/*.json', 'icon.svg']) {
+  for (const relative of ['quickdesk.mjs', 'client.js', 'compat.mjs', 'cordis.patch.yml', 'scripts/launcher.ps1', 'scripts/approval-popup.ps1', 'scripts/collect-diagnostics.ps1', 'locale/*.json', 'icon.svg']) {
     if (!files.includes(relative)) throw new Error(`files is missing ${relative}`);
   }
   return `${files.length} patterns`;

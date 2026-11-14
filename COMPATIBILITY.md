@@ -8,8 +8,8 @@ change, or at most a one-file change.
 | Component | Version |
 |---|---|
 | QuickDesk | 1.2.0 |
-| DeepSeek Harness Desktop | 0.2.2-rc.1 |
-| `@deepseek-ai/dsh` runtime | 0.2.2-rc.1 |
+| DeepSeek Harness Desktop | 0.2.2-rc.3 |
+| `@deepseek-ai/dsh` runtime | 0.2.2-rc.3 |
 | `dsh-computer-use-win` (optional, not imported) | 0.5.6 |
 
 ## All DSH-core touch points

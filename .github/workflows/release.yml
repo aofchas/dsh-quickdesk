@@ -20,10 +20,8 @@ jobs:
           node-version: 22
           registry-url: https://registry.npmjs.org
       - run: npm ci
-      - name: Offline self-test
-        run: node scripts/selftest.mjs
-      - name: Release metadata gate
-        run: node scripts/verify-release.mjs
+      - name: Test suite (publish gate)
+        run: npm test
       - name: Verify tag matches package version
         shell: bash
         run: |
@@ -45,8 +43,19 @@ jobs:
         run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Resolve bilingual release notes
+        id: notes
+        shell: bash
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          FILE="docs/release-notes/$VERSION.md"
+          if [ ! -f "$FILE" ]; then
+            echo "Missing bilingual release notes: $FILE"
+            exit 1
+          fi
+          echo "path=$FILE" >> "$GITHUB_OUTPUT"
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          generate_release_notes: true
+          body_path: ${{ steps.notes.outputs.path }}
           files: dsh-quickdesk-*.tgz

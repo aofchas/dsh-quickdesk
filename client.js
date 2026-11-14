@@ -30,7 +30,8 @@ window.__ModuleLoader__.load({
       popupTimeoutMs: 120000,
       autoPresetNewSessions: true,
       autoPresetName: 'auto',
-      disableComputerUseUi: false
+      disableComputerUseUi: false,
+      diagnosticsRequest: ''
     };
     const KEYS = Object.keys(DEFAULTS);
     const CORNERS = ['top-right', 'top-left', 'bottom-right', 'bottom-left'];
@@ -95,6 +96,12 @@ window.__ModuleLoader__.load({
         labelDisableComputerUseUi: '尝试关闭 computer-use 浮窗',
         hintDisableComputerUseUi: '可选：请 DSH 设置服务关闭 computer-use 插件的浮窗/接管提示；默认关闭',
         restartNote: '保存后立即生效；如果改的是快捷键或状态条位置，浮窗会重启一次（约 1 秒）。',
+        groupDiagnostics: '诊断与支持',
+        hintDiagnostics: '遇到问题时运行诊断：收集 DSH / QuickDesk 环境、日志和 sidecar 状态并生成 zip。报告包含本机路径和进程信息，请只发给开发者。',
+        runDiagnostics: '运行诊断…',
+        diagnosticsRequested: '已请求诊断，正在启动收集器…',
+        diagnosticsRunning: '正在收集诊断信息，请稍候…',
+        diagnosticsIdle: '点击按钮后选择报告保存位置；完成后会自动打开报告所在文件夹。',
         save: '保存',
         saving: '保存中…',
         saved: '已保存',
@@ -163,6 +170,12 @@ window.__ModuleLoader__.load({
         labelDisableComputerUseUi: 'Try turning off the computer-use overlay',
         hintDisableComputerUseUi: 'Optional: asks the DSH settings service to hide the computer-use overlay/takeover hint; off by default',
         restartNote: 'Changes apply immediately; shortcut or HUD-corner edits restart the overlay once (about 1 second).',
+        groupDiagnostics: 'Diagnostics and support',
+        hintDiagnostics: 'When something is wrong, run diagnostics: it collects the DSH / QuickDesk environment, logs and sidecar state into a zip. The report contains local paths and process details, so share it only with the developer.',
+        runDiagnostics: 'Run diagnostics...',
+        diagnosticsRequested: 'Diagnostics requested; starting the collector...',
+        diagnosticsRunning: 'Collecting diagnostics; please wait...',
+        diagnosticsIdle: 'Click the button, then choose where to save the report. The report folder opens when it is ready.',
         save: 'Save',
         saving: 'Saving…',
         saved: 'Saved',
@@ -279,10 +292,17 @@ window.__ModuleLoader__.load({
       const [saving, setSaving] = React.useState(false);
       const [message, setMessage] = React.useState('');
       const [tone, setTone] = React.useState('');
+      const [diagnosticsBusy, setDiagnosticsBusy] = React.useState(false);
 
       React.useEffect(() => {
         if (!dirty) setDraft(saved);
       }, [savedKey, dirty]);
+
+      React.useEffect(() => {
+        if (!diagnosticsBusy) return undefined;
+        const timer = setTimeout(() => setDiagnosticsBusy(false), 120000);
+        return () => clearTimeout(timer);
+      }, [diagnosticsBusy]);
 
       if (!ready) return h(Notice, { t: tr, status: state && state.status });
 
@@ -342,6 +362,21 @@ window.__ModuleLoader__.load({
         setDirty(false);
         setMessage('');
         setTone('');
+      };
+      const startDiagnostics = async () => {
+        if (diagnosticsBusy) return;
+        setDiagnosticsBusy(true);
+        setTone('');
+        setMessage(tr('diagnosticsRequested'));
+        try {
+          await savePatch({ diagnosticsRequest: String(Date.now()) });
+          setTone('success');
+          setMessage(tr('diagnosticsRequested'));
+        } catch (error) {
+          setDiagnosticsBusy(false);
+          setTone('error');
+          setMessage(tr('saveFailed') + (error && error.message ? ': ' + String(error.message) : ''));
+        }
       };
 
       const text = (field) => h('input', {
@@ -439,6 +474,18 @@ window.__ModuleLoader__.load({
             text('autoPresetName')),
           h(Field, { label: tr('labelDisableComputerUseUi'), hint: tr('hintDisableComputerUseUi') },
             h('label', { style: styles.inline }, toggle('disableComputerUseUi')))),
+        h('div', { style: styles.group },
+          h('h3', { style: styles.groupTitle }, tr('groupDiagnostics')),
+          h('p', { style: styles.hint }, tr('hintDiagnostics')),
+          h('div', null,
+            h('button', {
+              type: 'button',
+              style: styles.button,
+              disabled: disabled || diagnosticsBusy,
+              onClick: startDiagnostics
+            }, diagnosticsBusy ? tr('diagnosticsRunning') : tr('runDiagnostics'))),
+          h('p', { style: styles.hint, role: 'status' },
+            diagnosticsBusy ? tr('diagnosticsRunning') : tr('diagnosticsIdle'))),
         h('p', { style: styles.note }, tr('restartNote')),
         h('div', { style: styles.footer },
           h('button', { type: 'button', style: styles.primary, disabled, onClick: save }, saving ? tr('saving') : tr('save')),

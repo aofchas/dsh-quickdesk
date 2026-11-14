@@ -266,7 +266,7 @@ namespace QuickDesk
             hidden.EnsureHandle();
             if (selfTest)
             {
-                hidden.BeginInvoke(new Action(delegate { status.ShowStatus("已完成 · 12 步 · 41 秒", 9000); }));
+                hidden.BeginInvoke(new Action(delegate { status.ShowStatus("Done - 12 steps - 41s", 9000); }));
                 var quitTimer = new System.Threading.Timer(delegate(object state)
                 {
                     try { hidden.BeginInvoke(new Action(delegate { Application.Exit(); })); } catch { }
@@ -412,7 +412,7 @@ namespace QuickDesk
             Padding = new Padding(0);
 
             var brand = new Label();
-            brand.Text = string.IsNullOrWhiteSpace(brandText) ? "QuickDesk  ·  桌面快捷助理" : brandText;
+            brand.Text = string.IsNullOrWhiteSpace(brandText) ? "QuickDesk  -  desktop assistant" : brandText;
             brand.AutoSize = false;
             brand.Bounds = new Rectangle(26, 14, 360, 22);
             brand.ForeColor = Color.FromArgb(146, 165, 255);
@@ -422,7 +422,7 @@ namespace QuickDesk
 
             hint = new Label();
             hint.Text = string.IsNullOrWhiteSpace(hintText)
-                ? Keys2.Display(submitKey) + " 发送    " + Keys2.Display(cancelKey) + " 关闭"
+                ? Keys2.Display(submitKey) + " send    " + Keys2.Display(cancelKey) + " close"
                 : hintText;
             hint.AutoSize = false;
             hint.TextAlign = ContentAlignment.MiddleRight;
@@ -453,7 +453,7 @@ namespace QuickDesk
             shell.Controls.Add(box);
 
             placeholder = new Label();
-            placeholder.Text = string.IsNullOrWhiteSpace(placeholderText) ? "输入一句话，交给桌面助手…" : placeholderText;
+            placeholder.Text = string.IsNullOrWhiteSpace(placeholderText) ? "Type one sentence for the desktop assistant..." : placeholderText;
             placeholder.AutoSize = false;
             placeholder.Bounds = new Rectangle(17, 13, 620, 26);
             placeholder.ForeColor = Color.FromArgb(104, 111, 126);
@@ -732,7 +732,7 @@ namespace QuickDesk
 '@
 
 Add-Type -TypeDefinition $source -ReferencedAssemblies System.Windows.Forms, System.Drawing, System.Core
-$brandText = Decode-QuickDeskText $UiBrand 'QuickDesk  ·  桌面快捷助理'
-$placeholderText = Decode-QuickDeskText $UiPlaceholder '输入一句话，交给桌面助手…'
-$hintText = Decode-QuickDeskText $UiHint ("$SubmitKey 发送    $CancelKey 关闭")
+$brandText = Decode-QuickDeskText $UiBrand 'QuickDesk  -  desktop assistant'
+$placeholderText = Decode-QuickDeskText $UiPlaceholder 'Type one sentence for the desktop assistant...'
+$hintText = Decode-QuickDeskText $UiHint ("$SubmitKey send    $CancelKey close")
 [QuickDesk.Program]::Run($Hotkey, $StatusCorner, $SubmitKey, $CancelKey, $brandText, $placeholderText, $hintText, [bool]$SelfTest)

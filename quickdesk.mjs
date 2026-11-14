@@ -10,7 +10,7 @@
 //  * the native UI (input box / status HUD / approval popup) is a standalone
 //    PowerShell sidecar; it receives its localized strings from this host half.
 import { spawn } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import z from '@deepseek-ai/schemastery';
 import { createDshCompat, errorText } from './compat.mjs';
@@ -85,7 +85,12 @@ const DEFAULTS = {
   // never changes another plugin's UI unless the user opts in. The client half
   // was removed in 1.1.0: a client module cannot see this config and used to
   // write those fields unconditionally.
-  disableComputerUseUi: false
+  disableComputerUseUi: false,
+  // Diagnostics bridge: the settings page writes a new request token, the Host
+  // runs scripts/collect-diagnostics.ps1 (native Save-As dialog) and publishes
+  // progress/result through these volatile fields. No separate client-to-host
+  // RPC is needed; the normal settings save path is the carrier.
+  diagnosticsRequest: ''
 };
 
 // DSH Settings → Plugins reads this Config schema and serves the values as the
@@ -130,7 +135,9 @@ const ConfigFields = {
   autoPresetName: z.string().default(DEFAULTS.autoPresetName)
     .description('自动套用的权限预设名 / Permission preset name to apply'),
   disableComputerUseUi: z.boolean().default(DEFAULTS.disableComputerUseUi)
-    .description('可选：让 DSH 设置服务尝试关闭 computer-use 的浮窗/接管提示 / Optional: ask DSH settings to turn off the computer-use overlay')
+    .description('可选：让 DSH 设置服务尝试关闭 computer-use 的浮窗/接管提示 / Optional: ask DSH settings to turn off the computer-use overlay'),
+  diagnosticsRequest: z.string().default(DEFAULTS.diagnosticsRequest)
+    .description('诊断请求令牌（由设置页按钮写入，请勿手改）/ Diagnostics request token written by the settings-page button')
 };
 
 /** DSH settings forms only project `volatile` fields; some loaders' schemastery
@@ -189,6 +196,7 @@ export function readConfig(raw) {
   if (typeof config.disableComputerUseUi !== 'boolean') config.disableComputerUseUi = DEFAULTS.disableComputerUseUi;
   if (typeof config.autoPresetName !== 'string' || config.autoPresetName === '') config.autoPresetName = DEFAULTS.autoPresetName;
   if (typeof config.workspaceDirectory !== 'string') config.workspaceDirectory = DEFAULTS.workspaceDirectory;
+  if (typeof config.diagnosticsRequest !== 'string') config.diagnosticsRequest = DEFAULTS.diagnosticsRequest;
   return config;
 }
 
@@ -382,6 +390,88 @@ export function apply(ctx, rawConfig) {
       return undefined;
     }
   };
+  // -----------------------------------------------------------------
+  // Diagnostics bridge (settings page button -> Host -> collector script).
+  // The client cannot call arbitrary Host methods, so it writes a request
+  // token through the normal settings save path; the watcher below runs the
+  // collector. Progress and completion are surfaced through the HUD and by
+  // opening the report folder; no additional config state is persisted.
+  // -----------------------------------------------------------------
+  let diagnosticsBusy = false;
+
+  function revealReport(reportPath) {
+    if (!reportPath) return;
+    try {
+      const child = spawn('explorer.exe', ['/select,' + reportPath], { detached: true, stdio: 'ignore', windowsHide: true });
+      child.unref();
+    } catch { /* revealing the report is best effort */ }
+  }
+
+  async function runDiagnostics() {
+    if (diagnosticsBusy) return;
+    diagnosticsBusy = true;
+    try {
+      sendStatus(text('diagnosticsRunning'), 10000);
+      log.info('QuickDesk: diagnostics collector started');
+
+      const collectorPath = fileURLToPath(new URL('./scripts/collect-diagnostics.ps1', import.meta.url));
+      if (!existsSync(collectorPath)) throw new Error('collect-diagnostics.ps1 is missing from the installed package');
+      const child = spawn('powershell.exe', [
+        '-NoLogo', '-NoProfile', '-NonInteractive', '-STA', '-ExecutionPolicy', 'Bypass',
+        '-File', collectorPath
+      ], { windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
+      child.stdout.setEncoding('utf8');
+      child.stderr.setEncoding('utf8');
+      let stdout = '';
+      let stderr = '';
+      child.stdout.on('data', (chunk) => { stdout += chunk; });
+      child.stderr.on('data', (chunk) => { stderr += chunk; });
+      const exitCode = await new Promise((resolve) => {
+        child.once('error', (error) => {
+          stderr += '\n' + errorText(error);
+          resolve(-1);
+        });
+        child.once('close', (code) => resolve(code === null ? -1 : code));
+      });
+
+      const marker = 'QUICKDESK_DIAGNOSTICS_JSON: ';
+      const markerLine = stdout
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter((line) => line.startsWith(marker))
+        .pop();
+      let result = null;
+      if (markerLine) {
+        try { result = JSON.parse(markerLine.slice(marker.length)); } catch { result = null; }
+      }
+      const ok = Boolean(result && result.ok === true);
+      const canceled = Boolean(result && result.canceled === true);
+      let status;
+      if (ok) {
+        status = text('diagnosticsDone', { path: (result && result.zip) || '' });
+        sendStatus(status, config.statusLingerMs);
+        log.info('QuickDesk: diagnostics report saved to %s', (result && result.zip) || '(unknown)');
+        revealReport(result && result.zip);
+      } else if (canceled) {
+        status = text('diagnosticsCanceled');
+        sendStatus(status, 8000);
+        log.info('QuickDesk: diagnostics canceled by the user');
+      } else {
+        const stderrTail = stderr.trim().split(/\r?\n/).filter(Boolean).slice(-3).join(' | ');
+        const reason = (result && result.error) || stderrTail || ('collector exit code ' + exitCode);
+        status = text('diagnosticsFailed', { error: reason });
+        sendStatus(status, 15000);
+        log.warn('QuickDesk: diagnostics failed (%s)', reason);
+      }
+    } catch (error) {
+      const message = errorText(error);
+      log.warn('QuickDesk: diagnostics could not start (%s)', message);
+      sendStatus(text('diagnosticsFailed', { error: message }), 15000);
+    } finally {
+      diagnosticsBusy = false;
+    }
+  }
+
   const applyLiveConfig = (next) => {
     const previous = { ...config };
     Object.assign(config, next);
@@ -396,6 +486,11 @@ export function apply(ctx, rawConfig) {
     if (restart) {
       stopSidecar();
       startSidecar();
+    }
+    const diagnosticsRequested = String(previous.diagnosticsRequest || '') !== String(config.diagnosticsRequest || '') &&
+      String(config.diagnosticsRequest || '').trim() !== '';
+    if (diagnosticsRequested) {
+      runDiagnostics().catch((error) => log.warn('QuickDesk: diagnostics task failed (%s)', errorText(error)));
     }
     log.info('QuickDesk: settings updated live%s', restart ? ' (hotkey/HUD sidecar restarted)' : '');
   };

@@ -1,7 +1,7 @@
 {
   "name": "dsh-quickdesk",
-  "version": "1.2.0",
-  "description": "QuickDesk — a global-hotkey desktop assistant for DeepSeek Harness: in-app settings page, localized (zh/en) completion-first task protocol, hard step budget, translucent input box and one-line status HUD.",
+  "version": "1.2.1",
+  "description": "QuickDesk（快捷桌面）— a global-hotkey desktop assistant for DeepSeek Harness: in-app settings page, bilingual completion-first task protocol, hard step budget, one-line status HUD and an in-app diagnostics report.",
   "type": "module",
   "main": "quickdesk.mjs",
   "exports": {
@@ -12,10 +12,13 @@
     "./package.json": "./package.json"
   },
   "scripts": {
+    "test": "node scripts/test-all.mjs",
+    "test:unit": "node scripts/selftest.mjs",
+    "test:release": "node scripts/verify-release.mjs",
     "selftest": "node scripts/selftest.mjs",
     "verify": "node scripts/selftest.mjs",
     "verify:release": "node scripts/verify-release.mjs",
-    "prepublishOnly": "node scripts/verify-release.mjs && node scripts/selftest.mjs"
+    "prepublishOnly": "node scripts/test-all.mjs"
   },
   "keywords": [
     "dsh-plugin",
@@ -55,6 +58,7 @@
     "cordis.patch.yml",
     "scripts/launcher.ps1",
     "scripts/approval-popup.ps1",
+    "scripts/collect-diagnostics.ps1",
     "scripts/selftest.mjs",
     "scripts/verify-release.mjs",
     "locale/*.json",
@@ -66,7 +70,8 @@
     "SECURITY.md",
     "README.md",
     "README.en.md",
-    "COMPATIBILITY.md"
+    "COMPATIBILITY.md",
+    "LICENSE"
   ],
   "dsh": {
     "bundle": {

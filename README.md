@@ -1,15 +1,15 @@
 <p align="center">
-  <img src="docs/assets/icon.png" width="120" height="120" alt="QuickDesk icon" />
+  <img src="https://raw.githubusercontent.com/aofchas/dsh-quickdesk/main/docs/assets/icon.png" width="120" height="120" alt="QuickDesk icon" />
 </p>
 
 # QuickDesk
 
 [![CI](https://github.com/aofchas/dsh-quickdesk/actions/workflows/ci.yml/badge.svg)](https://github.com/aofchas/dsh-quickdesk/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/dsh-quickdesk.svg)](https://www.npmjs.com/package/dsh-quickdesk)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/aofchas/dsh-quickdesk/blob/main/LICENSE)
 [![Listed on dsh-plugin.org](https://dsh-plugin.org/badges/listed.svg)](https://dsh-plugin.org/plugins/aofchas/dsh-quickdesk)
 
-**简体中文** · [English](README.en.md)
+**简体中文** · [English](https://github.com/aofchas/dsh-quickdesk/blob/main/README.en.md)
 
 **QuickDesk**（快捷桌面）是一个可安装、可分发的 DeepSeek Harness 桌面助手插件。它把
 “全局快捷键 → 一句话任务 → 桌面 computer-use 执行”的入口封装成一个独立插件包：
@@ -19,7 +19,18 @@
 “global hotkey → one-sentence task → desktop computer-use execution” loop as a standalone plugin: shortcuts,
 language, task protocol and the status HUD are all editable on the **DSH settings page** — no YAML editing required.
 
+### English quick start
+
+- **Platform**: Windows 10/11 only (PowerShell 5.1 + WinForms).
+- **Requires**: DSH Desktop 0.2.2-rc.3 (rc.1 or newer) and `dsh-computer-use-win`, or another desktop computer-use provider.
+- **Install**: `dsh plugin --profile web add dsh-quickdesk`, then fully quit and restart DSH.
+- **Configure**: Settings → Plugins → QuickDesk; changes apply live, no YAML editing.
+- **Diagnostics**: Settings → Plugins → QuickDesk → Diagnostics and support; choose where to save the report zip.
+- **Full English guide**: [README.en.md](https://github.com/aofchas/dsh-quickdesk/blob/main/README.en.md).
+
 > **平台 Platform**：Windows 10/11 + PowerShell 5.1（仅 Windows · Windows-only）
+>
+> **环境 Environment**：DSH Desktop 0.2.2-rc.3 实测（rc.1 及以上）· tested with DSH Desktop 0.2.2-rc.3 (rc.1+)
 >
 > **依赖 Requires**：[`dsh-computer-use-win`](https://github.com/yu-tao-li/dsh-computer-use-win) 或其它提供桌面工具的
 > computer-use 插件，作为桌面执行后端 · a desktop computer-use provider is required
@@ -41,6 +52,7 @@ language, task protocol and the status HUD are all editable on the **DSH setting
 6. **审批弹窗**：需要确认的操作在右下角弹出，默认 Enter 通过、Backspace 拒绝；按键也可配置。
 7. **桌面后端自检**：提交任务前确认已注册桌面 computer-use 工具；没有安装 `dsh-computer-use-win`（或其他桌面工具提供方）时直接提示，不浪费一轮会话。
 8. **新会话默认自动审查（Auto review）**，任务在默认工作区创建。
+9. **设置页一键诊断**：设置 → Plugins → QuickDesk → 诊断与支持，可在弹窗中选择报告保存位置；报告收集环境、DSH profile、launcher.log、sidecar 状态、PowerShell 前置条件与近期 DSH 日志，zip 生成后自动删除临时收集目录。
 
 ## 为什么是 QuickDesk
 
@@ -60,13 +72,15 @@ language, task protocol and the status HUD are all editable on the **DSH setting
 
 设置 → Plugins → QuickDesk，所有选项可视化编辑：
 
-![QuickDesk 设置页](docs/assets/settings-page.png)
+![QuickDesk 设置页](https://raw.githubusercontent.com/aofchas/dsh-quickdesk/main/docs/assets/settings-page.png)
 
-![审批与权限](docs/assets/settings-page-approvals.png)
+![诊断与支持](https://raw.githubusercontent.com/aofchas/dsh-quickdesk/main/docs/assets/settings-page-diagnostics.png)
+
+![审批与权限](https://raw.githubusercontent.com/aofchas/dsh-quickdesk/main/docs/assets/settings-page-approvals.png)
 
 ## 安装
 
-要求：Windows 10/11、PowerShell 5.1、DSH（`web` 或 `desktop` profile），以及一个提供桌面工具的
+要求：Windows 10/11、PowerShell 5.1、DSH（`web` 或 `desktop` profile；0.2.2-rc.3 实测，rc.1 及以上），以及一个提供桌面工具的
 computer-use 插件（推荐 [`dsh-computer-use-win`](https://github.com/yu-tao-li/dsh-computer-use-win)）。
 
 从 npm 安装（推荐）：
@@ -79,7 +93,7 @@ dsh plugin --profile web add dsh-quickdesk
 dsh plugin --profile desktop add dsh-quickdesk
 ```
 
-也可以从 GitHub Release 下载 `dsh-quickdesk-1.2.0.tgz`，在 DSH「插件 → 添加插件」中选择安装，
+也可以从 GitHub Release 下载 `dsh-quickdesk-1.2.1.tgz`，在 DSH「插件 → 添加插件」中选择安装，
 或从本地源码目录安装（在仓库根目录执行，把 `.` 换成实际克隆目录也可以）：
 
 ```powershell
@@ -90,9 +104,10 @@ dsh plugin --profile desktop add .
 
 ## 发布
 
-- 变更记录：[CHANGELOG.md](CHANGELOG.md)
-- 发布流程与市场提交：[docs/PUBLISHING.md](docs/PUBLISHING.md)
-- 市场提交文案（中英）：[docs/market-copy.md](docs/market-copy.md)
+- 变更记录：[CHANGELOG.md](https://github.com/aofchas/dsh-quickdesk/blob/main/CHANGELOG.md)
+- 本版本双语文案：[docs/release-notes/1.2.1.md](https://github.com/aofchas/dsh-quickdesk/blob/main/docs/release-notes/1.2.1.md)
+- 发布流程与市场提交：[docs/PUBLISHING.md](https://github.com/aofchas/dsh-quickdesk/blob/main/docs/PUBLISHING.md)
+- 市场提交文案（中英）：[docs/market-copy.md](https://github.com/aofchas/dsh-quickdesk/blob/main/docs/market-copy.md)
 
 ## 配置
 
@@ -155,8 +170,9 @@ dsh plugin --profile desktop add .
 | `autoPresetNewSessions` | `true` | 新会话是否自动套用自动审查预设 |
 | `autoPresetName` | `auto` | 预设名 |
 | `disableComputerUseUi` | `false` | 可选：通过 DSH 设置服务尝试关闭 computer-use-win 的浮窗/接管提示/鼠标标签（仅 Host 端、尽力而为，默认关闭） |
+| `diagnosticsRequest` | 空 | Host 内部：设置页“运行诊断”按钮写入的请求令牌（请勿手改） |
 
-> 以上字段都可以在 DSH 设置页直接修改；本表列出默认值、范围和语义，供分发默认值与排障时参考。
+> 以上字段都可以在 DSH 设置页直接修改；本表列出默认值、范围和语义，供分发默认值与排障时参考。`diagnosticsRequest` 由设置页按钮维护，正常使用不需要手改。
 
 ### 语言与文案
 
@@ -165,6 +181,17 @@ dsh plugin --profile desktop add .
 - 设置页自身的界面文案在 [`client.js`](client.js) 的 `dictionaries` 里（同样中英双份），与 locale 文件保持同一套措辞。
 - 新增语言：复制 `locale/en.json` 为 `locale/xx.json`，把 `language` 设为 `xx`，并在 `quickdesk.mjs` 的 `LANGUAGES`、`client.js` 的 `dictionaries` 里登记。
 - 自定义任务协议：既可在设置页的「任务协议」里写，也可在 profile patch 写 `defaultPrompt: |`；`{{MAX_STEPS}}` 会被替换成当前 `maxSteps`。
+
+### 诊断与支持
+
+设置 → Plugins → QuickDesk → **诊断与支持** → **运行诊断…**。会弹出原生“另存为”对话框选择报告保存位置；报告是一个 zip，生成成功后自动删除临时收集目录。
+
+- 报告内容：系统与编码、DSH 版本与各 profile、QuickDesk 安装版本、`launcher.log`、sidecar 进程、PowerShell/Add-Type/互斥锁/隐藏启动测试、插件模块 import 结果、近期 DSH 日志摘要。
+- 报告可能包含本机路径、用户名和进程命令行，属于隐私数据，请只发给开发者。
+- 也可以命令行运行（`<插件目录>` 指 profile 里的 `node_modules/dsh-quickdesk`）：
+  ```powershell
+  powershell -NoProfile -ExecutionPolicy Bypass -File "<插件目录>\scripts\collect-diagnostics.ps1" -OutputZip "C:\Temp\QuickDesk-Diagnostics.zip"
+  ```
 
 ## 步数与 token 优化（v1.0.3 起）
 
@@ -212,7 +239,8 @@ UIA 使用手册：[skills/uia/SKILL.md](skills/uia/SKILL.md)（工具映射、U
 ## 开发与自检
 
 ```powershell
-node scripts/selftest.mjs   # 44 项离线自检：文案一致性、语言解析、协议渲染、步数预算、取消 API、桌面工具识别、Config schema 与设置页接线
+npm test                    # 发布门禁：编码、PowerShell 解析/GB2312、模块、包内容、诊断、sidecar 运行时
+npm run test:unit           # 44 项离线自检
 node --check client.js      # 设置页客户端语法检查
 ```
 
@@ -223,6 +251,7 @@ node --check client.js      # 设置页客户端语法检查
   - 按热键后应出现 `hotkey fired via ...` 和 `input shown`；没有这两行说明按键没有到达 QuickDesk（常见原因：前台窗口是管理员权限窗口、被输入法/键盘软件拦截、或 sidecar 正在随插件重载重启）。
 - QuickDesk 依赖 DSH 运行；DSH 退出后全局热键不可用。
 - 冲突时改 `cordis.patch.yml` 的 `hotkey:`（如 `Ctrl+Alt+K`），重载/重启 DSH。
+- 仍然无法定位时，用「设置 → Plugins → QuickDesk → 诊断与支持 → 运行诊断…」生成报告发给开发者。
 
 ## 已知限制
 
@@ -247,6 +276,6 @@ node --check client.js      # 设置页客户端语法检查
 
 本项目采用 **MIT License** 开源，允许自由使用、修改、分发和商用，保留版权与许可声明即可。
 
-- 完整许可文本：[LICENSE](LICENSE)
+- 完整许可文本：[LICENSE](https://github.com/aofchas/dsh-quickdesk/blob/main/LICENSE)
 - 版权归属：Copyright (c) 2026 aofchas (aofchas)
 - 第三方说明：QuickDesk 不捆绑第三方运行时代码；运行时依赖的 DeepSeek Harness 及其客户端包遵循各自许可证，见 `THIRD_PARTY` 相关上游文档。
