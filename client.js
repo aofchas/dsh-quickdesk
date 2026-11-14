@@ -53,7 +53,9 @@ window.__ModuleLoader__.load({
         groupTask: '任务执行',
         groupApproval: '审批与权限',
         labelHotkey: '呼出快捷键',
-        hintHotkey: '例如 Ctrl+Alt+Space；支持 Ctrl/Alt/Shift/Win 组合',
+        hintHotkey: '点击“按下组合键”后直接按组合键；支持 Ctrl/Alt/Shift/Win',
+        captureHotkey: '按下组合键…',
+        capturingHotkey: '请按下组合键（Esc 取消）',
         labelSubmitKey: '提交键',
         hintSubmitKey: '输入框里按下即提交任务',
         labelCancelKey: '取消键',
@@ -127,7 +129,9 @@ window.__ModuleLoader__.load({
         groupTask: 'Task execution',
         groupApproval: 'Approvals and permissions',
         labelHotkey: 'Hotkey',
-        hintHotkey: 'For example Ctrl+Alt+Space; supports Ctrl/Alt/Shift/Win',
+        hintHotkey: 'Click “Press shortcut…” and press the combination; supports Ctrl/Alt/Shift/Win',
+        captureHotkey: 'Press shortcut…',
+        capturingHotkey: 'Press keys (Esc to cancel)',
         labelSubmitKey: 'Submit key',
         hintSubmitKey: 'Pressed in the input box to submit the task',
         labelCancelKey: 'Cancel key',
@@ -204,6 +208,56 @@ window.__ModuleLoader__.load({
       return KEY_RE.test(text);
     }
 
+    const MODIFIER_KEYS = new Set(['control', 'ctrl', 'shift', 'alt', 'meta', 'os']);
+
+    function normalizeCapturedKey(raw) {
+      const text = String(raw === undefined || raw === null ? '' : raw);
+      if (!text) return null;
+      const lower = text.toLowerCase();
+      if (MODIFIER_KEYS.has(lower)) return null;
+      if (lower === ' ' || lower === 'space' || lower === 'spacebar') return 'Space';
+      if (lower === 'esc' || lower === 'escape') return 'Escape';
+      if (lower === 'return' || lower === 'enter') return 'Enter';
+      if (lower === 'tab') return 'Tab';
+      if (lower === 'backspace') return 'Backspace';
+      if (lower === 'delete' || lower === 'del') return 'Delete';
+      if (lower === 'insert' || lower === 'ins') return 'Insert';
+      if (lower === 'home') return 'Home';
+      if (lower === 'end') return 'End';
+      if (lower === 'pageup' || lower === 'pgup') return 'PageUp';
+      if (lower === 'pagedown' || lower === 'pgdn') return 'PageDown';
+      if (lower === 'up' || lower === 'arrowup') return 'Up';
+      if (lower === 'down' || lower === 'arrowdown') return 'Down';
+      if (lower === 'left' || lower === 'arrowleft') return 'Left';
+      if (lower === 'right' || lower === 'arrowright') return 'Right';
+      if (/^f(?:[1-9]|1[0-9]|2[0-4])$/i.test(text)) return text.toUpperCase();
+      if (/^[a-z]$/i.test(text)) return text.toUpperCase();
+      if (/^[0-9]$/.test(text)) return text;
+      return null;
+    }
+
+    function formatHotkeyEvent(event) {
+      if (!event) return null;
+      const key = normalizeCapturedKey(event.key);
+      if (!key) return null;
+      const parts = [];
+      if (event.ctrlKey) parts.push('Ctrl');
+      if (event.altKey) parts.push('Alt');
+      if (event.shiftKey) parts.push('Shift');
+      if (event.metaKey) parts.push('Win');
+      parts.push(key);
+      const spec = parts.join('+');
+      return isKeySpec(spec) ? spec : null;
+    }
+
+    function captureHotkeyEvent(event) {
+      if (!event || event.repeat) return null;
+      if (event.key === 'Escape') return { action: 'cancel' };
+      if (MODIFIER_KEYS.has(String(event.key || '').toLowerCase())) return null;
+      const value = formatHotkeyEvent(event);
+      return value ? { action: 'set', value } : null;
+    }
+
     function same(a, b) {
       return JSON.stringify(a) === JSON.stringify(b);
     }
@@ -237,6 +291,7 @@ window.__ModuleLoader__.load({
         fontSize: '13px'
       },
       inline: { display: 'flex', alignItems: 'center', gap: '8px' },
+      hotkeyRow: { display: 'flex', alignItems: 'center', gap: '8px' },
       footer: { display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', paddingTop: '4px' },
       note: { color: 'var(--dsw-alias-label-tertiary, #9aa0aa)', fontSize: '12px' },
       button: {
@@ -246,7 +301,8 @@ window.__ModuleLoader__.load({
         background: 'transparent',
         color: 'inherit',
         font: 'inherit',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        whiteSpace: 'nowrap'
       },
       primary: {
         padding: '6px 16px',
@@ -293,6 +349,8 @@ window.__ModuleLoader__.load({
       const [message, setMessage] = React.useState('');
       const [tone, setTone] = React.useState('');
       const [diagnosticsBusy, setDiagnosticsBusy] = React.useState(false);
+      const [capturingHotkey, setCapturingHotkey] = React.useState(false);
+      const hotkeyCaptureRef = React.useRef(null);
 
       React.useEffect(() => {
         if (!dirty) setDraft(saved);
@@ -303,6 +361,12 @@ window.__ModuleLoader__.load({
         const timer = setTimeout(() => setDiagnosticsBusy(false), 120000);
         return () => clearTimeout(timer);
       }, [diagnosticsBusy]);
+
+      React.useEffect(() => {
+        if (!capturingHotkey) return;
+        const node = hotkeyCaptureRef.current;
+        if (node && typeof node.focus === 'function') node.focus();
+      }, [capturingHotkey]);
 
       if (!ready) return h(Notice, { t: tr, status: state && state.status });
 
@@ -378,11 +442,25 @@ window.__ModuleLoader__.load({
           setMessage(tr('saveFailed') + (error && error.message ? ': ' + String(error.message) : ''));
         }
       };
+      const captureHotkeyKeyDown = (event) => {
+        if (!capturingHotkey) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const captured = captureHotkeyEvent(event);
+        if (!captured) return;
+        setCapturingHotkey(false);
+        if (captured.action === 'cancel') return;
+        change('hotkey', captured.value);
+      };
+      const toggleHotkeyCapture = () => {
+        if (disabled) return;
+        setCapturingHotkey((value) => !value);
+      };
 
-      const text = (field) => h('input', {
+      const text = (field, extraStyle) => h('input', {
         id: 'quickdesk-' + field,
         type: 'text',
-        style: styles.control,
+        style: { ...styles.control, ...(extraStyle || {}) },
         value: draft[field],
         disabled,
         onChange: (event) => change(field, event.target.value)
@@ -422,7 +500,22 @@ window.__ModuleLoader__.load({
         h('p', { style: styles.intro }, tr('intro')),
         h('div', { style: styles.group },
           h('h3', { style: styles.groupTitle }, tr('groupShortcuts')),
-          h(Field, { label: tr('labelHotkey'), hint: tr('hintHotkey') }, text('hotkey')),
+          h(Field, { label: tr('labelHotkey'), hint: tr('hintHotkey') },
+            h('div', { style: styles.hotkeyRow },
+              text('hotkey', { flex: '1 1 auto', minWidth: 0 }),
+              h('button', {
+                type: 'button',
+                ref: hotkeyCaptureRef,
+                style: capturingHotkey ? styles.primary : styles.button,
+                disabled,
+                onClick: toggleHotkeyCapture,
+                onKeyDown: captureHotkeyKeyDown,
+                onBlur: () => {
+                  if (capturingHotkey) setCapturingHotkey(false);
+                },
+                title: tr('hintHotkey'),
+                'aria-pressed': capturingHotkey
+              }, capturingHotkey ? tr('capturingHotkey') : tr('captureHotkey')))),
           h(Field, { label: tr('labelSubmitKey'), hint: tr('hintSubmitKey') }, text('submitKey')),
           h(Field, { label: tr('labelCancelKey'), hint: tr('hintCancelKey') }, text('cancelKey')),
           h(Field, { label: tr('labelApproveKey'), hint: tr('hintApproveKey') }, text('approveKey')),
@@ -546,6 +639,6 @@ window.__ModuleLoader__.load({
       });
     }
 
-    return { apply, inject: ['slots', 'locale'] };
+    return { apply, inject: ['slots', 'locale'], __test: { formatHotkeyEvent, captureHotkeyEvent, isKeySpec } };
   }
 });

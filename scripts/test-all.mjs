@@ -15,6 +15,7 @@ const suites = [
   ['guard: ASCII-only PowerShell scripts', 'scripts/tests/encoding.test.mjs'],
   ['static: PowerShell parse + GB2312 simulation', 'scripts/tests/powershell-syntax.test.mjs'],
   ['unit: module API, config and locales', 'scripts/tests/module.test.mjs'],
+  ['unit: client hotkey capture', 'scripts/tests/client-hotkey.test.mjs'],
   ['release: bilingual release notes', 'scripts/tests/release-notes.test.mjs'],
   ['diagnostics: collector zip + temp cleanup', 'scripts/tests/diagnostics.test.mjs'],
   ['package: manifest, version sync and pack contents', 'scripts/tests/package.test.mjs'],

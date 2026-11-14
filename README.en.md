@@ -26,7 +26,7 @@ shortcuts, language, task protocol and status HUD are all editable on the **DSH 
 
 ## Features
 
-1. **Global hotkey**: `Ctrl+Alt+Space` by default; summon a translucent input box from any foreground app, submit with the configured key, close with the cancel key.
+1. **Global hotkey**: `Ctrl+Alt+Space` by default; press the combination you want directly in Settings to capture it. Summon a translucent input box from any foreground app, submit with the configured key, close with the cancel key.
 2. **DSH settings page**: Settings → Plugins → QuickDesk lets you edit shortcuts, language, status HUD, workspace, task protocol, step budget and approval options; saving writes into the active profile configuration, so you never edit `cordis.patch.yml` by hand.
 3. **Completion-first task protocol**: every task is prefixed with built-in instructions (chosen from `locale/<language>.json` → `prompt`):
    - **Stop when done**: once the requested state exists (results page loaded / text typed / file saved), stop — no more scrolling, screenshots or page reading;
@@ -45,7 +45,7 @@ shortcuts, language, task protocol and status HUD are all editable on the **DSH 
 
 For the same “let the AI operate my desktop” job, QuickDesk targets the two most practical problems: **the entry point and the token cost**.
 
-- **No chat window, no long prompt**: press `Ctrl+Alt+Space` from any foreground app, say one sentence and it runs; the task lives in its own session, so your current conversation is untouched.
+- **No chat window, no long prompt**: press your configured hotkey (defaults to `Ctrl+Alt+Space`) from any foreground app, say one sentence and it runs; the task lives in its own session, so your current conversation is untouched.
 - **Billed on “done”, not on “summary”**: stop when done, one-line reply, no page recap by default; the same YouTube search task dropped from **53 tool calls to about 10 steps** (12 screenshots → ≤2).
 - **The step budget is a hard limit**: exceeding `maxSteps` cancels the turn (default 20); the model cannot burn tokens on endless verification or scrolling, and the HUD tells you why it stopped.
 - **No coordinate guessing**: UIA-first with screenshot fallback removes most of the “screenshot → read pixels → click” loop.

@@ -40,7 +40,7 @@ language, task protocol and the status HUD are all editable on the **DSH setting
 
 ## 功能
 
-1. **全局快捷键**：默认 `Ctrl+Alt+Space`，任何程序前台下呼出半透明输入框；按配置的提交键执行，取消键关闭。
+1. **全局快捷键**：默认 `Ctrl+Alt+Space`，可在设置页直接按下想要的组合键录入；任何程序前台下呼出半透明输入框，按配置的提交键执行，取消键关闭。
 2. **DSH 设置页**：设置 → Plugins → QuickDesk，直接修改快捷键、语言、状态浮窗、工作目录、任务协议、步数预算、审批选项；保存写入当前 profile 的配置，无需编辑 `cordis.patch.yml`。
 3. **完成优先的任务协议**：每条任务前自动附加内置说明（按语言取 `locale/<language>.json` 的 `prompt`）：
    - **完成即停**：目标状态出现（结果页已加载 / 文字已输入 / 文件已保存）就结束，不再滚动、截图、读取页面；
@@ -59,7 +59,7 @@ language, task protocol and the status HUD are all editable on the **DSH setting
 
 同样是“让 AI 操作桌面”，QuickDesk 解决的是**调用入口和 token 成本**这两个最实际的问题：
 
-- **不用打开聊天窗口写 prompt**：任何程序前台下按 `Ctrl+Alt+Space`，说一句话就执行；任务跑在独立会话里，不打断你当前的对话。
+- **不用打开聊天窗口写 prompt**：按配置的呼出快捷键（默认 `Ctrl+Alt+Space`），说一句话就执行；任务跑在独立会话里，不打断你当前的对话。
 - **按“完成”而不是“总结”结账**：默认完成即停、只回 1 行、页面内容不赘述；同一个 YouTube 搜索任务从 **53 次工具调用降到约 10 步**（12 张截图 → ≤2 张）。
 - **步数预算是硬约束**：`maxSteps` 超限直接取消本轮（默认 20），模型没法靠无限验证/翻页烧 token；HUD 会显示停止原因。
 - **桌面操作不靠猜坐标**：UIA 优先 + 截图兜底，减少“截图→看像素→点击”的循环。

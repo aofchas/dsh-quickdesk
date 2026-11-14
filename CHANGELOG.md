@@ -4,6 +4,19 @@ All notable changes to QuickDesk are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- The Hotkey field in Settings can capture a combination directly: click
+  “Press shortcut…”, press the keys, and the field is filled with a validated
+  `Ctrl+Alt+…`-style spec. Modifier-only presses are ignored and Esc cancels.
+  `scripts/tests/client-hotkey.test.mjs` covers formatting, validation,
+  modifier filtering and Esc cancellation.
+
+### Changed
+- README no longer presents the default `Ctrl+Alt+Space` as the only way to
+  summon QuickDesk; it points at the configured hotkey instead.
+
 ## [1.2.1] - 2026-11-14
 
 ### Fixed

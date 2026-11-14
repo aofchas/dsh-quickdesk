@@ -13,17 +13,18 @@
 | GitHub Release | 打 `v*` tag 后 release workflow 先跑 `npm test`，通过才 npm publish / 建 Release；Release 正文必须来自双语的 `docs/release-notes/<version>.md` |
 | 手工验收 | 每个 release 必须在至少一台**中文代码页（GB2312/936）Windows** 和一台 UTF-8 系统上按第 6 节验收 |
 
-`npm test` 目前包含 9 个套件（见 `scripts/test-all.mjs`）：
+`npm test` 目前包含 10 个套件（见 `scripts/test-all.mjs`）：
 
 1. `scripts/selftest.mjs` — 44 项离线单元检查
 2. `scripts/verify-release.mjs` — 发布元数据检查
 3. `scripts/tests/encoding.test.mjs` — **所有 .ps1/.cmd 必须纯 ASCII**
 4. `scripts/tests/powershell-syntax.test.mjs` — PowerShell 5.1 解析 + GB2312 读取模拟
 5. `scripts/tests/module.test.mjs` — 配置、语言、协议、预算、locale 契约
-6. `scripts/tests/release-notes.test.mjs` — **每个版本必须有中英双语 Release 说明**
-7. `scripts/tests/diagnostics.test.mjs` — 诊断脚本生成 zip、内容完整、临时目录清理
-8. `scripts/tests/package.test.mjs` — manifest、版本一致性、npm pack 内容
-9. `scripts/tests/launcher-runtime.test.mjs` — 隐藏 sidecar 启动/热键/注册/重启/互斥
+6. `scripts/tests/client-hotkey.test.mjs` — 设置页按键录入：组合键格式化、Esc 取消、修饰键过滤
+7. `scripts/tests/release-notes.test.mjs` — **每个版本必须有中英双语 Release 说明**
+8. `scripts/tests/diagnostics.test.mjs` — 诊断脚本生成 zip、内容完整、临时目录清理
+9. `scripts/tests/package.test.mjs` — manifest、版本一致性、npm pack 内容
+10. `scripts/tests/launcher-runtime.test.mjs` — 隐藏 sidecar 启动/热键/注册/重启/互斥
 
 ## 2. 测试分层
 
@@ -150,6 +151,8 @@ node scripts/tests/launcher-runtime.test.mjs
 - [ ] 按默认热键弹出输入框。
 
 ### 6.2 快捷键矩阵
+- [ ] 设置页点击“按下组合键…”，按下 `Ctrl+Shift+F9`，字段自动填入且保存后生效；
+- [ ] 录入时仅按 Ctrl/Shift/Alt 不改变字段，按 Esc 取消录入；
 - [ ] `Ctrl+Alt+Space` 弹框；
 - [ ] `Ctrl+0` 弹框（本次问题键）；
 - [ ] `Ctrl+Shift+0` 弹框；
