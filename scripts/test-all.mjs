@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 const suites = [
-  ['unit: selftest (44 checks)', 'scripts/selftest.mjs'],
+  ['unit: selftest (45 checks)', 'scripts/selftest.mjs'],
   ['release: metadata gate', 'scripts/verify-release.mjs'],
   ['guard: ASCII-only PowerShell scripts', 'scripts/tests/encoding.test.mjs'],
   ['static: PowerShell parse + GB2312 simulation', 'scripts/tests/powershell-syntax.test.mjs'],

@@ -54,6 +54,7 @@ language, task protocol and the status HUD are all editable on the **DSH setting
 7. **桌面后端自检**：提交任务前确认已注册桌面 computer-use 工具；没有安装 `dsh-computer-use-win`（或其他桌面工具提供方）时直接提示，不浪费一轮会话。
 8. **新会话默认自动审查（Auto review）**，任务在默认工作区创建。
 9. **设置页一键诊断**：设置 → Plugins → QuickDesk → 诊断与支持，可在弹窗中选择报告保存位置；报告收集环境、DSH profile、launcher.log、sidecar 状态、PowerShell 前置条件与近期 DSH 日志，zip 生成后自动删除临时收集目录。
+10. **多步任务先拆解**：需要多个可见步骤时，任务协议要求先用 `todo_write` 记录 2–6 个步骤，再逐步执行并更新状态；一步任务自动跳过。可在设置页关闭（`planFirst`）。
 
 ## 为什么是 QuickDesk
 
@@ -92,7 +93,7 @@ dsh plugin --profile web add dsh-quickdesk
 dsh plugin --profile desktop add dsh-quickdesk
 ```
 
-也可以从 GitHub Release 下载 `dsh-quickdesk-1.2.4.tgz`，在 DSH「插件 → 添加插件」中选择安装，
+也可以从 GitHub Release 下载 `dsh-quickdesk-1.2.5.tgz`，在 DSH「插件 → 添加插件」中选择安装，
 或从本地源码目录安装（在仓库根目录执行，把 `.` 换成实际克隆目录也可以）：
 
 ```powershell
@@ -104,7 +105,7 @@ dsh plugin --profile desktop add .
 ## 版本与变更
 
 - 变更记录：[CHANGELOG.md](https://github.com/aofchas/dsh-quickdesk/blob/main/CHANGELOG.md)
-- 1.2.4 发布说明：[docs/release-notes/1.2.4.md](https://github.com/aofchas/dsh-quickdesk/blob/main/docs/release-notes/1.2.4.md)
+- 1.2.4 发布说明：[docs/release-notes/1.2.5.md](https://github.com/aofchas/dsh-quickdesk/blob/main/docs/release-notes/1.2.5.md)
 
 ## 配置
 
@@ -131,6 +132,7 @@ dsh plugin --profile desktop add .
     statusLingerMs: 20000
     workspaceDirectory: ""
     defaultPrompt: ""
+    planFirst: true
     maxSteps: 20
     enforceMaxSteps: true
     approvalPopup: true
@@ -162,6 +164,7 @@ dsh plugin --profile desktop add .
 | `maxSteps` | `20` | 单个任务允许的工具调用步数上限；超过后 QuickDesk 直接取消这一轮（范围 5–200） |
 | `enforceMaxSteps` | `true` | 是否强制执行步数上限；`false` 时只在 prompt 里提示预算 |
 | `defaultPrompt` | 空 | 空 = 内置当前语言的任务协议；非空则替换它，可用 `{{MAX_STEPS}}` 占位符 |
+| `planFirst` | `true` | 多步任务先用 `todo_write` 拆成 2–6 步再执行；一步任务自动跳过 |
 | `approvalPopup` | `true` | 是否接管审批弹窗 |
 | `popupTimeoutMs` | `120000` | 审批超时（自动拒绝） |
 | `autoPresetNewSessions` | `true` | 新会话是否自动套用自动审查预设 |

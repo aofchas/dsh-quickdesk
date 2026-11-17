@@ -15,7 +15,7 @@
 
 `npm test` 目前包含 10 个套件（见 `scripts/test-all.mjs`）：
 
-1. `scripts/selftest.mjs` — 44 项离线单元检查
+1. `scripts/selftest.mjs` — 45 项离线单元检查
 2. `scripts/verify-release.mjs` — 发布元数据检查
 3. `scripts/tests/encoding.test.mjs` — **所有 .ps1/.cmd 必须纯 ASCII**
 4. `scripts/tests/powershell-syntax.test.mjs` — PowerShell 5.1 解析 + GB2312 读取模拟
@@ -110,7 +110,7 @@
 
 ```powershell
 npm test                 # 全部套件（发布门禁）
-npm run test:unit        # selftest 44 项
+npm run test:unit        # selftest 45 项
 npm run test:release     # 发布元数据检查
 npm test -- --list       # 当前不支持；直接看 scripts/test-all.mjs
 ```
@@ -190,6 +190,7 @@ node scripts/tests/launcher-runtime.test.mjs
 - [ ] 故意设 maxSteps=5 的复杂任务：超限停止且 HUD 提示；
 - [ ] 默认不截图（≤2 张兜底）；
 - [ ] 桌面后端缺失（禁用 computer-use-win）时提示而不是提交任务。
+- [ ] 多步任务（如“看走马上任第五集”）：先建 2–6 个 todo 再执行；一步任务不建 todo；关闭 planFirst 后不再建 todo。
 
 ### 6.6 审批
 - [ ] 触发审批时右下角弹窗，中文文案正确；

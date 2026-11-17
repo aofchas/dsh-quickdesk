@@ -73,6 +73,9 @@ const DEFAULTS = {
   // Empty = the built-in localized protocol from locale/<language>.json.
   // A non-empty value replaces it and may use the {{MAX_STEPS}} placeholder.
   defaultPrompt: '',
+  // Ask the agent to decompose a multi-step task with todo_write before acting.
+  // The protocol itself is localized; this switch only enables/disables it.
+  planFirst: true,
   // Hard budget: after this many tool calls QuickDesk cancels the turn instead
   // of letting the model keep verifying/summarizing a task that is already done.
   maxSteps: 20,
@@ -122,6 +125,8 @@ const ConfigFields = {
     .description('新会话工作目录；空 = DSH 默认工作区 / Workspace for new sessions; empty = DSH default'),
   defaultPrompt: z.string().default(DEFAULTS.defaultPrompt)
     .description('自定义任务协议；空 = 内置本地化协议，可用 {{MAX_STEPS}} / Custom protocol; empty = built-in localized protocol'),
+  planFirst: z.boolean().default(DEFAULTS.planFirst)
+    .description('多步任务先用 todo_write 拆解再执行 / Decompose multi-step tasks with todo_write before acting'),
   maxSteps: z.number().min(5).max(200).default(DEFAULTS.maxSteps)
     .description('单个任务的工具调用步数上限，超限取消本轮 / Tool-call step budget per task; the turn is cancelled beyond it'),
   enforceMaxSteps: z.boolean().default(DEFAULTS.enforceMaxSteps)
@@ -252,6 +257,7 @@ export function readConfig(raw) {
   if (!Number.isFinite(config.statusLingerMs) || config.statusLingerMs < 1000) config.statusLingerMs = DEFAULTS.statusLingerMs;
   if (!LANGUAGES.includes(config.language) && config.language !== 'auto') config.language = DEFAULTS.language;
   if (typeof config.defaultPrompt !== 'string') config.defaultPrompt = DEFAULTS.defaultPrompt;
+  if (typeof config.planFirst !== 'boolean') config.planFirst = DEFAULTS.planFirst;
   if (!Number.isInteger(config.maxSteps) || config.maxSteps < 5 || config.maxSteps > 200) config.maxSteps = DEFAULTS.maxSteps;
   if (typeof config.enforceMaxSteps !== 'boolean') config.enforceMaxSteps = DEFAULTS.enforceMaxSteps;
   if (typeof config.approvalPopup !== 'boolean') config.approvalPopup = DEFAULTS.approvalPopup;
@@ -270,7 +276,14 @@ export function renderPrompt(config, language) {
   const locale = getLocale(lang);
   const custom = typeof config.defaultPrompt === 'string' ? config.defaultPrompt : '';
   const template = custom.trim() === '' ? (locale.prompt || '') : custom;
-  return String(template).replace(/\{\{MAX_STEPS\}\}/g, String(config.maxSteps));
+  const policy = config.planFirst === false ? '' : String(locale.planPolicy || '');
+  let prompt = String(template).replace(/\{\{MAX_STEPS\}\}/g, String(config.maxSteps));
+  if (String(template).includes('{{PLAN_POLICY}}')) {
+    prompt = prompt.replace(/\{\{PLAN_POLICY\}\}/g, policy);
+  } else if (policy) {
+    prompt = prompt.replace(/\s*$/, '') + '\n\n' + policy;
+  }
+  return prompt;
 }
 
 /** Whether the tracked tool-call count has passed the configured budget. */

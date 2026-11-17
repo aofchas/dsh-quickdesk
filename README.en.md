@@ -40,6 +40,7 @@ shortcuts, language, task protocol and status HUD are all editable on the **DSH 
 7. **Desktop-backend self-check**: before submitting a task, QuickDesk verifies that desktop computer-use tools are registered; if `dsh-computer-use-win` (or another desktop provider) is missing, it shows a hint instead of burning a session.
 8. **Auto review preset for new sessions**; tasks are created in the default workspace.
 9. **One-click diagnostics in Settings**: Settings → Plugins → QuickDesk → Diagnostics and support lets you choose where to save a report zip; it collects the environment, DSH profiles, `launcher.log`, sidecar state, PowerShell prerequisites and recent DSH logs, then deletes the temporary collection folder.
+10. **Plan multi-step tasks first**: when a task needs several visible steps, the protocol asks the agent to use `todo_write` for 2–6 steps, execute them in order and update each status; one-step tasks skip planning. Can be disabled in Settings (`planFirst`).
 
 ## Why QuickDesk
 
@@ -78,7 +79,7 @@ dsh plugin --profile web add dsh-quickdesk
 dsh plugin --profile desktop add dsh-quickdesk
 ```
 
-Alternatively, download `dsh-quickdesk-1.2.4.tgz` from the GitHub Release and use “Plugins → Add plugin”
+Alternatively, download `dsh-quickdesk-1.2.5.tgz` from the GitHub Release and use “Plugins → Add plugin”
 in DSH, or install from a local checkout (run inside the repository root; replacing `.` with the clone path also works):
 
 ```powershell
@@ -90,7 +91,7 @@ dsh plugin --profile desktop add .
 ## Release notes
 
 - Changelog: [CHANGELOG.md](https://github.com/aofchas/dsh-quickdesk/blob/main/CHANGELOG.md)
-- 1.2.4 release notes: [docs/release-notes/1.2.4.md](https://github.com/aofchas/dsh-quickdesk/blob/main/docs/release-notes/1.2.4.md)
+- 1.2.4 release notes: [docs/release-notes/1.2.5.md](https://github.com/aofchas/dsh-quickdesk/blob/main/docs/release-notes/1.2.5.md)
 
 ## Configuration
 
@@ -117,6 +118,7 @@ To lock defaults, distribute in bulk or run GitOps, you can still replace the wh
     statusLingerMs: 20000
     workspaceDirectory: ""
     defaultPrompt: ""
+    planFirst: true
     maxSteps: 20
     enforceMaxSteps: true
     approvalPopup: true
@@ -148,6 +150,7 @@ To lock defaults, distribute in bulk or run GitOps, you can still replace the wh
 | `maxSteps` | `20` | Tool-call budget per task; exceeding it cancels the turn (range 5–200) |
 | `enforceMaxSteps` | `true` | Enforce the budget; `false` keeps it prompt-only |
 | `defaultPrompt` | empty | Empty = built-in protocol for the active language; otherwise it replaces it and may use `{{MAX_STEPS}}` |
+| `planFirst` | `true` | Decompose multi-step tasks into 2–6 `todo_write` steps before acting; one-step tasks skip planning |
 | `approvalPopup` | `true` | Take over approval requests with the QuickDesk popup |
 | `popupTimeoutMs` | `120000` | Approval timeout (auto-reject) |
 | `autoPresetNewSessions` | `true` | Apply the Auto review permission preset to new sessions |

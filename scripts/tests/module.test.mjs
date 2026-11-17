@@ -45,6 +45,7 @@ const EXPECTED_KEYS = [
   'statusLingerMs',
   'workspaceDirectory',
   'defaultPrompt',
+  'planFirst',
   'maxSteps',
   'enforceMaxSteps',
   'approvalPopup',
@@ -57,7 +58,7 @@ const EXPECTED_KEYS = [
 
 check('exports apply()', () => equal(typeof qd.apply, 'function'));
 check('exports Config schema', () => truthy(qd.Config, 'Config schema export is missing'));
-check('CONFIG_KEYS matches the documented 19 fields', () => {
+check('CONFIG_KEYS matches the documented 20 fields', () => {
   equal(qd.CONFIG_KEYS.length, EXPECTED_KEYS.length);
   for (const key of EXPECTED_KEYS) truthy(qd.CONFIG_KEYS.includes(key), `missing config key ${key}`);
 });
@@ -73,6 +74,7 @@ check('readConfig({}) returns documented defaults', () => {
   equal(config.language, 'auto');
   equal(config.statusCorner, 'top-right');
   equal(config.statusEnabled, true);
+  equal(config.planFirst, true);
   equal(config.maxSteps, 20);
   equal(config.enforceMaxSteps, true);
   equal(config.approvalPopup, true);
@@ -117,8 +119,14 @@ check('readConfig() clamps invalid numbers and enums', () => {
   equal(config.statusCorner, 'top-right');
   equal(config.statusLingerMs, 20000);
   equal(config.language, 'auto');
+  equal(config.planFirst, true);
   equal(config.maxSteps, 20);
   equal(config.popupTimeoutMs, 120000);
+});
+
+check('readConfig() keeps an explicit planFirst=false', () => {
+  equal(qd.readConfig({ planFirst: false }).planFirst, false);
+  equal(qd.readConfig({ planFirst: 'no' }).planFirst, true);
 });
 
 check('readConfig() keeps valid overrides', () => {
@@ -191,14 +199,34 @@ check('renderPrompt() uses the localized built-in protocol', () => {
   const prompt = qd.renderPrompt({ defaultPrompt: '', maxSteps: 20, language: 'en' }, 'en');
   truthy(prompt.length > 100, 'localized English prompt should be non-trivial');
   truthy(prompt.includes('20'), 'prompt should contain the step budget');
+  truthy(prompt.includes('todo_write'), 'default prompt should include the planning policy');
+  truthy(!prompt.includes('{{PLAN_POLICY}}'), 'planning placeholder should be rendered');
+});
+
+check('renderPrompt() omits the planning policy when planFirst is false', () => {
+  const prompt = qd.renderPrompt(
+    { defaultPrompt: '', planFirst: false, maxSteps: 20, language: 'zh' },
+    'zh'
+  );
+  truthy(!prompt.includes('todo_write'), 'disabled planning should not mention todo_write');
+  truthy(prompt.includes('任务：'), 'task marker should remain');
 });
 
 check('renderPrompt() replaces {{MAX_STEPS}} in a custom protocol', () => {
   const prompt = qd.renderPrompt(
-    { defaultPrompt: 'Do the task in at most {{MAX_STEPS}} steps.', maxSteps: 12 },
+    { defaultPrompt: 'Do the task in at most {{MAX_STEPS}} steps.', planFirst: false, maxSteps: 12 },
     'zh'
   );
   equal(prompt, 'Do the task in at most 12 steps.');
+});
+
+check('renderPrompt() appends planning to a custom protocol without a placeholder', () => {
+  const prompt = qd.renderPrompt(
+    { defaultPrompt: 'Custom protocol.', planFirst: true, maxSteps: 20, language: 'en' },
+    'en'
+  );
+  truthy(prompt.startsWith('Custom protocol.'), 'custom protocol should be retained');
+  truthy(prompt.includes('todo_write'), 'planning policy should be appended');
 });
 
 // ---------------------------------------------------------------------------
@@ -221,6 +249,8 @@ check('LOCALES zh/en are present and structurally identical', () => {
   equal(typeof zh.prompt, 'string');
   equal(typeof en.prompt, 'string');
   truthy(zh.prompt.length > 0 && en.prompt.length > 0, 'prompts must be non-empty');
+  truthy(typeof zh.planPolicy === 'string' && zh.planPolicy.length > 0, 'zh planPolicy missing');
+  truthy(typeof en.planPolicy === 'string' && en.planPolicy.length > 0, 'en planPolicy missing');
   for (const lang of ['zh', 'en']) {
     const meta = qd.LOCALES[lang].meta || {};
     truthy(meta.title && meta.description, `${lang} meta title/description missing`);

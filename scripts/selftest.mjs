@@ -72,8 +72,15 @@ check('render: en built-in prompt has the budget filled in', () => {
   assert.ok(!prompt.includes('{{MAX_STEPS}}'), 'placeholder left in prompt');
 });
 check('render: custom defaultPrompt overrides the localized protocol', () => {
-  const prompt = renderPrompt(readConfig({ language: 'zh', defaultPrompt: 'budget={{MAX_STEPS}}', maxSteps: 12 }));
+  const prompt = renderPrompt(readConfig({ language: 'zh', defaultPrompt: 'budget={{MAX_STEPS}}', planFirst: false, maxSteps: 12 }));
   assert.equal(prompt, 'budget=12');
+});
+check('render: planFirst controls the todo_write planning policy', () => {
+  const enabled = renderPrompt(readConfig({ language: 'zh' }));
+  const disabled = renderPrompt(readConfig({ language: 'zh', planFirst: false }));
+  assert.match(enabled, /todo_write/);
+  assert.ok(!enabled.includes('{{PLAN_POLICY}}'), 'planning placeholder left in prompt');
+  assert.doesNotMatch(disabled, /todo_write/);
 });
 check('config: defaultPrompt defaults to empty (built-in protocol)', () => assert.equal(readConfig({}).defaultPrompt, ''));
 
