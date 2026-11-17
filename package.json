@@ -84,10 +84,14 @@
     }
   },
   "peerDependencies": {
-    "@deepseek-ai/schemastery": ">=3.18.1"
+    "@deepseek-ai/schemastery": ">=3.18.1",
+    "dsh-computer-use-win": ">=0.6.0"
   },
   "peerDependenciesMeta": {
     "@deepseek-ai/schemastery": {
+      "optional": true
+    },
+    "dsh-computer-use-win": {
       "optional": true
     }
   },

@@ -6,6 +6,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const moduleUrl = pathToFileURL(resolve(repoRoot, 'quickdesk.mjs')).href;
+const compatUrl = pathToFileURL(resolve(repoRoot, 'compat.mjs')).href;
 
 const failures = [];
 let passed = 0;
@@ -32,6 +33,7 @@ function truthy(value, message) {
 }
 
 const qd = await import(moduleUrl);
+const compat = await import(compatUrl);
 
 const EXPECTED_KEYS = [
   'hotkey',
@@ -201,6 +203,7 @@ check('renderPrompt() uses the localized built-in protocol', () => {
   truthy(prompt.includes('20'), 'prompt should contain the step budget');
   truthy(prompt.includes('todo_write'), 'default prompt should include the planning policy');
   truthy(!prompt.includes('{{PLAN_POLICY}}'), 'planning placeholder should be rendered');
+  truthy(prompt.includes('targetResponsive:false'), 'prompt should carry the hard fail-fast rule');
 });
 
 check('renderPrompt() omits the planning policy when planFirst is false', () => {
@@ -227,6 +230,32 @@ check('renderPrompt() appends planning to a custom protocol without a placeholde
   );
   truthy(prompt.startsWith('Custom protocol.'), 'custom protocol should be retained');
   truthy(prompt.includes('todo_write'), 'planning policy should be appended');
+});
+
+// ---------------------------------------------------------------------------
+// Hard fail-fast and optional computer-use version
+// ---------------------------------------------------------------------------
+check('unresponsiveToolText() detects hung-target results', () => {
+  const hung = { isError: false, content: [{ type: 'text', text: '{"ok":true,"targetResponsive":false}' }] };
+  equal(qd.unresponsiveToolText(hung).includes('targetResponsive'), true);
+  equal(qd.unresponsiveToolText({ isError: true, content: [{ type: 'text', text: 'Error: Windows Computer Use backend timed out after 30000ms during keypress' }] }).length > 0, true);
+  equal(qd.unresponsiveToolText({ isError: true, content: [{ type: 'text', text: 'The target window could not be brought to the foreground' }] }).length > 0, true);
+  equal(qd.unresponsiveToolText({ isError: false, content: [{ type: 'text', text: '{"ok":true,"windows":[]}' }] }), '');
+  equal(qd.unresponsiveToolText({ isError: true, content: [{ type: 'text', text: 'POINT_COVERED: another window is in front' }] }), '');
+});
+
+check('versionAtLeast() compares major/minor/patch numerically', () => {
+  equal(compat.versionAtLeast('0.6.0', '0.6.0'), true);
+  equal(compat.versionAtLeast('0.5.6', '0.6.0'), false);
+  equal(compat.versionAtLeast('0.10.0', '0.6.0'), true);
+  equal(compat.versionAtLeast('1.0.0', '0.6.0'), true);
+  equal(compat.versionAtLeast('', '0.6.0'), false);
+});
+
+check('computerUseVersion() is optional and never throws', () => {
+  const value = compat.computerUseVersion();
+  equal(typeof value.found, 'boolean');
+  if (value.found) truthy(typeof value.version === 'string' || value.version === null, 'found version must be a string or null');
 });
 
 // ---------------------------------------------------------------------------

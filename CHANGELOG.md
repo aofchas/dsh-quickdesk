@@ -8,6 +8,12 @@ All notable changes to QuickDesk are documented here. The format follows
 
 ### Added
 - Multi-step tasks are decomposed with `todo_write` before acting; enabled by default (`planFirst`).
+- Hard fail-fast on an unresponsive desktop target (`targetResponsive:false`, backend timeout, or foreground failure): the turn is cancelled instead of retrying input.
+- Diagnostics now include `browser-hang.txt`: `dsh-computer-use-win` version, Chrome/Edge/Explorer responsiveness and recent Application Hang/Error events.
+
+### Changed
+- Requires `dsh-computer-use-win` 0.6.0 or newer when that package is installed; older versions are refused with an upgrade hint.
+- Browser-lane (CDP) integration is deferred; see `docs/ROADMAP.md`.
 
 ## [1.2.4] - 2026-11-14
 

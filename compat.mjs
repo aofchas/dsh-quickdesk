@@ -12,11 +12,16 @@
 //  * Tool names from any computer-use provider are normalized generically by
 //    stripping an `mcp__<server>__` prefix; no plugin-specific import exists.
 import { randomUUID } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
+export const MIN_COMPUTER_USE_VERSION = '0.6.0';
 
 export const TESTED_WITH = Object.freeze({
   dsh: '0.2.2-rc.3',
   quickdesk: '1.2.5',
-  computerUsePlugin: 'dsh-computer-use-win 0.5.6 (optional; not imported)'
+  computerUsePlugin: 'dsh-computer-use-win 0.6.0 (optional; not imported)'
 });
 
 const MESSAGE_LIMIT = 400;
@@ -71,6 +76,34 @@ export function isDesktopToolName(name) {
   const short = String(name === undefined || name === null ? '' : name).replace(/^mcp__[^_]+__/, '');
   if (DESKTOP_TOOL_NAMES.has(short)) return true;
   return [...DESKTOP_TOOL_NAMES].some((key) => short.endsWith('_' + key));
+}
+
+/** Numeric major.minor.patch comparison; prerelease/build suffixes are ignored. */
+export function versionAtLeast(version, minimum) {
+  const parse = (value) => {
+    const match = String(value || '').match(/(\d+)(?:\.(\d+))?(?:\.(\d+))?/);
+    if (!match) return null;
+    return [Number(match[1]), Number(match[2] || 0), Number(match[3] || 0)];
+  };
+  const a = parse(version);
+  const b = parse(minimum);
+  if (!a || !b) return false;
+  for (let i = 0; i < 3; i += 1) {
+    if (a[i] > b[i]) return true;
+    if (a[i] < b[i]) return false;
+  }
+  return true;
+}
+
+/** Locate the optional dsh-computer-use-win package and read its version. */
+export function computerUseVersion() {
+  try {
+    const path = require.resolve('dsh-computer-use-win/package.json');
+    const pkg = JSON.parse(readFileSync(path, 'utf8'));
+    return { found: true, version: typeof pkg.version === 'string' ? pkg.version : null, path };
+  } catch {
+    return { found: false, version: null, path: null };
+  }
 }
 
 export function createDshCompat(ctx, log) {

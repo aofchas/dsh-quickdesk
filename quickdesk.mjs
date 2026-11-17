@@ -13,7 +13,7 @@ import { spawn } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import z from '@deepseek-ai/schemastery';
-import { createDshCompat, errorText } from './compat.mjs';
+import { createDshCompat, errorText, isDesktopToolName, computerUseVersion, versionAtLeast, MIN_COMPUTER_USE_VERSION } from './compat.mjs';
 
 export const name = 'quickdesk';
 
@@ -291,6 +291,30 @@ export function budgetExceeded(steps, config) {
   return config.enforceMaxSteps === true && Number.isInteger(steps) && steps > config.maxSteps;
 }
 
+/** Concatenate the model-facing result text and structured error detail. */
+export function toolResultText(result) {
+  const content = result && Array.isArray(result.content) ? result.content : [];
+  const text = content
+    .map((block) => (block && block.type === 'text' ? String(block.text || '') : ''))
+    .join('\n');
+  const error = result && result.error;
+  const detail = error && (error.reason || error.message || error.code);
+  return [text, detail ? String(detail) : ''].filter(Boolean).join('\n');
+}
+
+/** Detect a target that has already stopped answering; this is a hard stop. */
+export function unresponsiveToolText(result) {
+  const text = toolResultText(result);
+  if (!text) return '';
+  if (/"targetResponsive"\s*:\s*false/i.test(text)) return text;
+  if (/targetResponsive[^\n]*false/i.test(text)) return text;
+  if (/targetUnresponsive/i.test(text)) return text;
+  if (/backend timed out after \d+ms/i.test(text)) return text;
+  if (/target window could not be brought to the foreground/i.test(text)) return text;
+  if (/target window became unresponsive/i.test(text)) return text;
+  return '';
+}
+
 /** Keyboard label shown inside localized copy (`Escape` → `Esc`). */
 export function displayKey(value) {
   return String(value === undefined || value === null ? '' : value)
@@ -434,6 +458,15 @@ export function apply(ctx, rawConfig) {
     if (!backend.ok) {
       sendStatus(text('backendMissing'), config.statusLingerMs);
       log.warn('QuickDesk: no desktop computer-use tools are registered; task not submitted (install dsh-computer-use-win or another desktop MCP provider)');
+      return;
+    }
+    const computerUse = computerUseVersion();
+    if (computerUse.found && !versionAtLeast(computerUse.version, MIN_COMPUTER_USE_VERSION)) {
+      sendStatus(text('computerUseTooOld', {
+        version: computerUse.version || '?',
+        min: MIN_COMPUTER_USE_VERSION
+      }), config.statusLingerMs);
+      log.warn('QuickDesk: dsh-computer-use-win %s is older than the required %s; task not submitted', computerUse.version || '?', MIN_COMPUTER_USE_VERSION);
       return;
     }
     sendStatus(text('starting'), 6000);
@@ -636,6 +669,23 @@ export function apply(ctx, rawConfig) {
     return next();
   });
   ctx.effect(() => offPre, 'QuickDesk tool status');
+
+  // Hard fail-fast: once a desktop target reports that it is unresponsive, stop
+  // the whole turn. Retrying SendKeys/UIA on a hung Chrome is what turned one
+  // frozen window into a stuck Explorer in the field.
+  const offResult = compat.on('tools/result', (exec, result) => {
+    try {
+      if (!exec || !exec.agent || !isDesktopToolName(exec.name)) return;
+      const state = tracked.get(String(exec.agent.id));
+      if (!state || state.done) return;
+      if (!unresponsiveToolText(result)) return;
+      state.done = true;
+      const cancelled = compat.cancelAgent(exec.agent);
+      sendStatus(text('targetUnresponsive'), config.statusLingerMs);
+      log.warn('QuickDesk: desktop target stopped responding during %s; cancelling turn (%s)', exec.name, cancelled ? 'ok' : 'no api');
+    } catch { /* never affect the tool pipeline */ }
+  });
+  ctx.effect(() => offResult, 'QuickDesk unresponsive guard');
 
   const offStatus = compat.on('agent/status', ({ agent, status }) => {
     try {

@@ -23,7 +23,7 @@ language, task protocol and the status HUD are all editable on the **DSH setting
 
 - **平台**：仅 Windows 10/11（PowerShell 5.1 + WinForms）。
 - **环境**：DSH Desktop 0.2.2-rc.3（rc.1 及以上）。
-- **依赖**：`dsh-computer-use-win` 或其它提供桌面工具的 computer-use 插件。
+- **依赖**：`dsh-computer-use-win` **0.6.0 或更高**，或其它提供桌面工具的 computer-use 插件；低于 0.6.0 会被拒绝提交并提示升级。
 - **安装**：`dsh plugin --profile web add dsh-quickdesk`，完成后完全退出并重启 DSH。
 - **配置**：设置 → Plugins → QuickDesk；修改即时生效，无需手改 YAML。
 - **诊断**：设置 → Plugins → QuickDesk → 诊断与支持，选择报告 zip 的保存位置。
@@ -32,7 +32,7 @@ language, task protocol and the status HUD are all editable on the **DSH setting
 ### English quick start
 
 - **Platform**: Windows 10/11 only (PowerShell 5.1 + WinForms).
-- **Requires**: DSH Desktop 0.2.2-rc.3 (rc.1 or newer) and `dsh-computer-use-win`, or another desktop computer-use provider.
+- **Requires**: DSH Desktop 0.2.2-rc.3 (rc.1 or newer) and `dsh-computer-use-win` **0.6.0 or newer** (older versions are refused with an upgrade hint), or another desktop computer-use provider.
 - **Install**: `dsh plugin --profile web add dsh-quickdesk`, then fully quit and restart DSH.
 - **Configure**: Settings → Plugins → QuickDesk; changes apply live, no YAML editing.
 - **Diagnostics**: Settings → Plugins → QuickDesk → Diagnostics and support; choose where to save the report zip.
@@ -53,8 +53,9 @@ language, task protocol and the status HUD are all editable on the **DSH setting
 6. **审批弹窗**：需要确认的操作在右下角弹出，默认 Enter 通过、Backspace 拒绝；按键也可配置。
 7. **桌面后端自检**：提交任务前确认已注册桌面 computer-use 工具；没有安装 `dsh-computer-use-win`（或其他桌面工具提供方）时直接提示，不浪费一轮会话。
 8. **新会话默认自动审查（Auto review）**，任务在默认工作区创建。
-9. **设置页一键诊断**：设置 → Plugins → QuickDesk → 诊断与支持，可在弹窗中选择报告保存位置；报告收集环境、DSH profile、launcher.log、sidecar 状态、PowerShell 前置条件与近期 DSH 日志，zip 生成后自动删除临时收集目录。
+9. **设置页一键诊断**：设置 → Plugins → QuickDesk → 诊断与支持，可在弹窗中选择报告保存位置；报告收集环境、DSH profile、launcher.log、sidecar 状态、PowerShell 前置条件、浏览器/Explorer 响应状态与近期 DSH 日志，zip 生成后自动删除临时收集目录。
 10. **多步任务先拆解**：需要多个可见步骤时，任务协议要求先用 `todo_write` 记录 2–6 个步骤，再逐步执行并更新状态；一步任务自动跳过。可在设置页关闭（`planFirst`）。
+11. **未响应即停止**：目标窗口报告 `targetResponsive:false`、工具超时或无法切到前台时，立即取消本轮并提示「目标未响应」，不再重试按键/输入，也不再用 `launch_app` 救场。
 
 ## 为什么是 QuickDesk
 
@@ -81,7 +82,7 @@ language, task protocol and the status HUD are all editable on the **DSH setting
 ## 安装
 
 要求：Windows 10/11、PowerShell 5.1、DSH（`web` 或 `desktop` profile；0.2.2-rc.3 实测，rc.1 及以上），以及一个提供桌面工具的
-computer-use 插件（推荐 [`dsh-computer-use-win`](https://github.com/yu-tao-li/dsh-computer-use-win)）。
+computer-use 插件（推荐 [`dsh-computer-use-win`](https://github.com/yu-tao-li/dsh-computer-use-win) **0.6.0 或更高**；低于 0.6.0 会被拒绝并提示升级）。
 
 从 npm 安装（推荐）：
 
@@ -213,9 +214,11 @@ dsh plugin --profile desktop add .
 
 ## 与 dsh-computer-use-win 的配合
 
-- QuickDesk **不 import、不修改** computer-use 插件；只通过 DSH 工具注册表判断“桌面工具是否存在”。
+- QuickDesk **不 import、不修改** computer-use 插件；只通过 DSH 工具注册表判断“桌面工具是否存在”，并读取已安装的 `dsh-computer-use-win` 版本。
 - 提交任务前会检查 `mcp__*__list_windows` 这类桌面工具；缺失时状态条提示
   「未检测到桌面操控工具 · 请先安装 dsh-computer-use-win」，不会启动会话。
+- 已安装的 `dsh-computer-use-win` 低于 **0.6.0** 时拒绝提交，并提示先升级。
+- 目标窗口被判定为未响应（`targetResponsive:false` / 工具超时）时立即取消本轮，避免继续重试输入把 Explorer 拖住。
 - 如需隐藏 computer-use 插件自己的浮窗/接管提示：
   - 推荐在它的设置页关闭（`progressOverlayEnabled` / `indicatorEnabled` / `cursorIndicatorEnabled`）；
   - 也可以把 `disableComputerUseUi` 设为 `true` 让 QuickDesk 在启动时尽力代劳；当前 DSH 在 HMR 激活期间会拒绝该写入，此时只记录警告，不影响其他功能。
@@ -272,6 +275,10 @@ node --check client.js      # 设置页客户端语法检查
 - 默认不修改任何其他插件的设置；`disableComputerUseUi` 是显式 opt-in。
 - 任务协议只是模型指令，不替代 DSH 的权限策略；危险操作仍请在会话权限/审批层控制。
 - 步数上限只是终止「超预算的验证/总结」，不降低权限、不会自动批准任何操作。
+
+## 未来计划
+
+- **Browser lane（CDP）**：暂缓。当前优先保证桌面路径的安全与可诊断性；浏览器通道还达不到“像人一样操作可见浏览器”的体验，后续再评估。详见 [docs/ROADMAP.md](https://github.com/aofchas/dsh-quickdesk/blob/main/docs/ROADMAP.md)。
 
 ## License
 

@@ -28,7 +28,7 @@ const collectorCmd = join(repoRoot, 'scripts', 'collect-diagnostics.cmd');
 assert.ok(existsSync(collectorPath), 'collect-diagnostics.ps1 is missing');
 assert.ok(existsSync(collectorCmd), 'collect-diagnostics.cmd is missing');
 const source = readFileSync(collectorPath, 'utf8');
-for (const needle of ['[string]$OutputZip', 'SaveFileDialog', 'QUICKDESK_DIAGNOSTICS_JSON', 'tempRemoved']) {
+for (const needle of ['[string]$OutputZip', 'SaveFileDialog', 'QUICKDESK_DIAGNOSTICS_JSON', 'tempRemoved', 'browser-hang.txt', 'dsh-computer-use-win requirement: >= 0.6.0']) {
   assert.ok(source.includes(needle), `collector is missing ${needle}`);
 }
 
@@ -91,12 +91,16 @@ try {
   );
   assert.equal(expand.status, 0, `Expand-Archive failed: ${expand.stderr || expand.stdout}`);
   const names = new Set(readdirSync(unzipDir));
-  for (const required of ['summary.txt', 'environment.txt', 'dsh-version.txt', 'quickdesk-install.txt', 'plugin-import.txt', 'README.txt']) {
+  for (const required of ['summary.txt', 'environment.txt', 'dsh-version.txt', 'quickdesk-install.txt', 'browser-hang.txt', 'plugin-import.txt', 'README.txt']) {
     assert.ok(names.has(required), `report zip is missing ${required}`);
   }
   const summary = readFileSync(join(unzipDir, 'summary.txt'), 'utf8');
   assert.match(summary, /QuickDesk diagnostics summary/);
   assert.match(summary, /VERDICT:/);
+  assert.match(summary, /dsh-computer-use-win requirement: >= 0.6\.0/);
+  const hang = readFileSync(join(unzipDir, 'browser-hang.txt'), 'utf8');
+  assert.match(hang, /dsh-computer-use-win installs/);
+  assert.match(hang, /Browser and Explorer processes/);
 
   console.log('PASS diagnostics collector: zip, contents, JSON marker, temporary folder cleanup');
 } finally {

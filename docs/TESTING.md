@@ -190,6 +190,8 @@ node scripts/tests/launcher-runtime.test.mjs
 - [ ] 故意设 maxSteps=5 的复杂任务：超限停止且 HUD 提示；
 - [ ] 默认不截图（≤2 张兜底）；
 - [ ] 桌面后端缺失（禁用 computer-use-win）时提示而不是提交任务。
+- [ ] `dsh-computer-use-win` 低于 0.6.0 时拒绝提交，HUD 提示升级版本。
+- [ ] 人为让目标窗口未响应（或工具返回 `targetResponsive:false`）：本轮立即取消，HUD 显示「目标未响应」，不再继续按键。
 - [ ] 多步任务（如“看走马上任第五集”）：先建 2–6 个 todo 再执行；一步任务不建 todo；关闭 planFirst 后不再建 todo。
 
 ### 6.6 审批
@@ -202,6 +204,13 @@ node scripts/tests/launcher-runtime.test.mjs
 - [ ] 中文系统 auto=中文；强制 en=英文；
 - [ ] 输入框、HUD、审批弹窗、设置页、任务协议一致；
 - [ ] GB2312 系统上中文显示正常（由宿主 base64 传入，不依赖 .ps1 文件编码）。
+
+### 6.7.1 诊断报告（浏览器/Explorer 卡死）
+- [ ] 诊断 zip 包含 `browser-hang.txt`；
+- [ ] 文件列出 `dsh-computer-use-win` 版本与 `>= 0.6.0` 判定；
+- [ ] 文件列出 Chrome/Edge/Explorer 的 `Responding` 状态；
+- [ ] 文件列出最近 24h 的 Application Hang / Application Error 事件（没有则明确说明）；
+- [ ] `summary.txt` 包含版本要求结果、未响应进程数和事件数。
 
 ### 6.8 发布 / 市场
 - [ ] `npm pack` 产物包含 launcher/approval/locale/client/README/图标；

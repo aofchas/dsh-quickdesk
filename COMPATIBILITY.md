@@ -10,7 +10,7 @@ change, or at most a one-file change.
 | QuickDesk | 1.2.5 |
 | DeepSeek Harness Desktop | 0.2.2-rc.3 |
 | `@deepseek-ai/dsh` runtime | 0.2.2-rc.3 |
-| `dsh-computer-use-win` (optional, not imported) | 0.5.6 |
+| `dsh-computer-use-win` (optional, not imported) | 0.6.0 or newer |
 
 ## All DSH-core touch points
 
@@ -29,6 +29,7 @@ They are intentionally concentrated in `compat.mjs` and `quickdesk.mjs`:
 | `permissionPresets.current/set/catalog` | `compat.mjs` `applyAutoPreset()` | Optional; failures only skip the Auto preset. |
 | `settings.describe()` / `settings.update(ns, patch)` | `compat.mjs` `disableComputerUseUi()` | Optional, **opt-in only** (`disableComputerUseUi: false` by default): tries to turn off computer-use-win's overlay/indicator fields. DSH may reject the write during HMR; then QuickDesk logs a warning and everything else works. |
 | `approval/request` waterfall event | `quickdesk.mjs` answerer | Registered only when `approval` service exists; absent/renamed event is caught and logged. |
+| `tools/result` emit event | `quickdesk.mjs` unresponsive guard | Observe-only final tool outcomes; when a desktop tool reports an unresponsive target, QuickDesk cancels the turn. An absent/renamed event is caught and only leaves the prompt rule. |
 | `tools/pre-execute` waterfall event | `quickdesk.mjs` status + step budget | Uses only `exec.agent` (tracked id / cancel) and `exec.name` (HUD label), then calls `next()`. If the payload shape changes, adapt the one handler; the budget stop degrades to "prompt-only". |
 | `Config` export (schemastery `z.object`) | `quickdesk.mjs` | **Settings page contract.** DSH's settings service projects this schema into the `quickdesk` namespace and validates the row config on activation. A DSH without the settings service degrades to YAML-only configuration. |
 | `ctx.inject(['settings'])` → `settings.configure({ auto: false }, fiber)` | `quickdesk.mjs` `apply()` | Optional; declares that client.js owns the page. Missing/renamed service is caught and logged. |

@@ -19,7 +19,7 @@ shortcuts, language, task protocol and status HUD are all editable on the **DSH 
 >
 > **Environment**: DSH Desktop 0.2.2-rc.3 tested (rc.1 or newer)
 >
-> **Requires**: [`dsh-computer-use-win`](https://github.com/yu-tao-li/dsh-computer-use-win) or another computer-use
+> **Requires**: [`dsh-computer-use-win`](https://github.com/yu-tao-li/dsh-computer-use-win) **0.6.0 or newer** (older versions are refused with an upgrade hint), or another computer-use
 > provider that exposes desktop tools, as the desktop execution backend
 
 > Repository: <https://github.com/aofchas/dsh-quickdesk> (Windows only, PowerShell 5.1 + WinForms)
@@ -39,8 +39,9 @@ shortcuts, language, task protocol and status HUD are all editable on the **DSH 
 6. **Approval popup**: confirmation requests appear in the bottom-right corner; Enter approves, Backspace rejects by default, and both keys are configurable.
 7. **Desktop-backend self-check**: before submitting a task, QuickDesk verifies that desktop computer-use tools are registered; if `dsh-computer-use-win` (or another desktop provider) is missing, it shows a hint instead of burning a session.
 8. **Auto review preset for new sessions**; tasks are created in the default workspace.
-9. **One-click diagnostics in Settings**: Settings → Plugins → QuickDesk → Diagnostics and support lets you choose where to save a report zip; it collects the environment, DSH profiles, `launcher.log`, sidecar state, PowerShell prerequisites and recent DSH logs, then deletes the temporary collection folder.
+9. **One-click diagnostics in Settings**: Settings → Plugins → QuickDesk → Diagnostics and support lets you choose where to save a report zip; it collects the environment, DSH profiles, `launcher.log`, sidecar state, PowerShell prerequisites, browser/Explorer responsiveness and recent DSH logs, then deletes the temporary collection folder.
 10. **Plan multi-step tasks first**: when a task needs several visible steps, the protocol asks the agent to use `todo_write` for 2–6 steps, execute them in order and update each status; one-step tasks skip planning. Can be disabled in Settings (`planFirst`).
+11. **Stop when a target stops responding**: if a window reports `targetResponsive:false`, a tool times out or the target cannot be brought to the front, cancel the turn at once and show “Target unresponsive”; never retry keys/input or use `launch_app` to recover it.
 
 ## Why QuickDesk
 
@@ -67,7 +68,7 @@ Settings → Plugins → QuickDesk — every option is editable from the UI:
 ## Installation
 
 Requirements: Windows 10/11, PowerShell 5.1, DSH (`web` or `desktop` profile; tested with 0.2.2-rc.3, rc.1 or newer), and a computer-use plugin that
-provides desktop tools (recommended: [`dsh-computer-use-win`](https://github.com/yu-tao-li/dsh-computer-use-win)).
+provides desktop tools (recommended: [`dsh-computer-use-win`](https://github.com/yu-tao-li/dsh-computer-use-win) **0.6.0 or newer**; older versions are refused with an upgrade hint).
 
 Install from npm (recommended):
 
@@ -199,9 +200,11 @@ Tuning:
 
 ## Working with dsh-computer-use-win
 
-- QuickDesk **does not import or modify** the computer-use plugin; it only checks the DSH tool registry for desktop tools.
+- QuickDesk **does not import or modify** the computer-use plugin; it checks the DSH tool registry for desktop tools and reads the installed `dsh-computer-use-win` version.
 - Before submitting a task it checks for tools such as `mcp__*__list_windows`; when they are missing, the HUD shows
   “No desktop tools detected · install dsh-computer-use-win first” and no session is started.
+- If the installed `dsh-computer-use-win` is older than **0.6.0**, the task is refused with an upgrade hint.
+- When a target is unresponsive (`targetResponsive:false` or a tool timeout), the turn is cancelled at once instead of retrying input and dragging Explorer down with it.
 - To hide the computer-use plugin’s own overlay/takeover hint:
   - recommended: turn them off on its settings page (`progressOverlayEnabled` / `indicatorEnabled` / `cursorIndicatorEnabled`);
   - or set `disableComputerUseUi: true` so QuickDesk attempts it at startup; current DSH rejects that write during HMR activation, in which case QuickDesk only logs a warning and everything else keeps working.
@@ -258,6 +261,10 @@ node --check client.js   # settings-page client syntax
 - QuickDesk does not modify any other plugin’s settings by default; `disableComputerUseUi` is explicit opt-in.
 - The task protocol is only a model instruction; it does not replace DSH’s permission policy. Keep dangerous operations behind the session permission/approval layer.
 - The step budget only stops “over-budget verification/summary”; it never lowers permissions or auto-approves anything.
+
+## Roadmap
+
+- **Browser lane (CDP)**: deferred. The current priority is a safe, diagnosable desktop path; the browser lane is not yet as human-like as acting through the visible browser. See [docs/ROADMAP.md](https://github.com/aofchas/dsh-quickdesk/blob/main/docs/ROADMAP.md).
 
 ## License
 

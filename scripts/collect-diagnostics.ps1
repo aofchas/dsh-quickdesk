@@ -52,6 +52,10 @@ $script:addTypeOk = $false
 $script:mutexTestOk = $false
 $script:importTests = @()
 $script:dshVersionLines = @()
+$script:computerUseInstalls = @()
+$script:browserHangUnresponsive = 0
+$script:browserHangEventCount = 0
+$script:oldComputerUse = @()
 
 $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 $computer = if ($env:COMPUTERNAME) { $env:COMPUTERNAME } else { 'unknown' }
@@ -180,6 +184,31 @@ function Find-QuickDeskInstalls {
     }
   }
   return $items
+}
+
+function Find-ComputerUseInstalls {
+  $items = @()
+  $profilesRoot = Join-Path $env:USERPROFILE '.dsh\profiles'
+  if (-not (Test-Path $profilesRoot)) { return $items }
+  foreach ($profile in (Get-ChildItem $profilesRoot -Directory -ErrorAction SilentlyContinue)) {
+    $plugin = Join-Path $profile.FullName 'node_modules\dsh-computer-use-win'
+    $package = Join-Path $plugin 'package.json'
+    if (Test-Path $package) {
+      $version = ''
+      try { $version = (Get-Content -LiteralPath $package -Raw | ConvertFrom-Json).version } catch { }
+      $items += [pscustomobject]@{
+        Profile   = $profile.Name
+        PluginDir = $plugin
+        Version   = [string]$version
+      }
+    }
+  }
+  return $items
+}
+
+function Get-BrowserFileVersion {
+  param([string]$Path)
+  try { return (Get-Item -LiteralPath $Path).VersionInfo.FileVersion } catch { return '' }
 }
 
 Write-Host ''
@@ -350,7 +379,104 @@ Write-Section 'quickdesk-install.txt' {
 }
 
 # ---------------------------------------------------------------------------
-# 5. Processes
+# 5. Browser / Explorer hang evidence
+# ---------------------------------------------------------------------------
+Write-Section 'browser-hang.txt' {
+  $lines = @()
+  $lines += "Collected: $((Get-Date).ToString('o'))"
+  $lines += ''
+  $lines += '=== dsh-computer-use-win installs (required >= 0.6.0) ==='
+  $script:computerUseInstalls = @(Find-ComputerUseInstalls)
+  if ($script:computerUseInstalls.Count -eq 0) {
+    $lines += 'none found under ~/.dsh/profiles'
+  } else {
+    foreach ($item in $script:computerUseInstalls) {
+      $lines += "profile=$($item.Profile) version=$($item.Version) dir=$($item.PluginDir)"
+      try {
+        $parsed = [version]$item.Version
+        if ($parsed -lt [version]'0.6.0') {
+          $lines += '  REQUIREMENT: FAIL - upgrade dsh-computer-use-win to 0.6.0 or newer'
+          $script:oldComputerUse += "$($item.Profile): $($item.Version)"
+        } else {
+          $lines += '  REQUIREMENT: OK'
+        }
+      } catch {
+        $lines += '  REQUIREMENT: UNKNOWN - package version could not be parsed'
+        $script:oldComputerUse += "$($item.Profile): unknown"
+      }
+    }
+  }
+  $lines += ''
+  $lines += '=== Browser and Explorer processes (Responding=false is a hang) ==='
+  $processes = @(Get-Process -Name chrome,msedge,explorer -ErrorAction SilentlyContinue)
+  if ($processes.Count -eq 0) {
+    $lines += 'none found'
+  } else {
+    foreach ($p in ($processes | Sort-Object ProcessName, Id)) {
+      $responding = 'unknown'
+      $title = ''
+      $cpu = 0
+      $working = 0
+      try { $responding = [string]$p.Responding } catch { }
+      try { $title = [string]$p.MainWindowTitle } catch { }
+      try { $cpu = [double]$p.CPU } catch { }
+      try { $working = [double]$p.WorkingSet64 / 1MB } catch { }
+      if ($responding -eq 'False') { $script:browserHangUnresponsive += 1 }
+      if ($title.Length -gt 120) { $title = $title.Substring(0, 117) + '...' }
+      $lines += ("{0} PID={1} Responding={2} CPU={3:N1}s WorkingSetMB={4:N1} Title={5}" -f $p.ProcessName, $p.Id, $responding, $cpu, $working, $title)
+    }
+  }
+  $lines += ''
+  $lines += '=== Browser file versions ==='
+  $candidates = @(
+    (Join-Path $env:ProgramFiles 'Google\Chrome\Application\chrome.exe'),
+    (Join-Path ${env:ProgramFiles(x86)} 'Google\Chrome\Application\chrome.exe'),
+    (Join-Path $env:LOCALAPPDATA 'Google\Chrome\Application\chrome.exe'),
+    (Join-Path $env:ProgramFiles 'Microsoft\Edge\Application\msedge.exe'),
+    (Join-Path ${env:ProgramFiles(x86)} 'Microsoft\Edge\Application\msedge.exe')
+  )
+  $seen = @{}
+  foreach ($path in $candidates) {
+    if ([string]::IsNullOrWhiteSpace($path)) { continue }
+    if (-not (Test-Path $path)) { continue }
+    $key = $path.ToLowerInvariant()
+    if ($seen.ContainsKey($key)) { continue }
+    $seen[$key] = $true
+    $lines += "$path version=$(Get-BrowserFileVersion $path)"
+  }
+  if ($seen.Count -eq 0) { $lines += 'Chrome/Edge executable not found in standard locations' }
+  $lines += ''
+  $lines += '=== Application Hang / Application Error events (last 24h, Chrome/Edge/Explorer) ==='
+  $events = @()
+  try {
+    $filter = @{
+      LogName = 'Application'
+      StartTime = (Get-Date).AddHours(-24)
+      ProviderName = @('Application Hang', 'Application Error')
+    }
+    $events = @(Get-WinEvent -FilterHashtable $filter -MaxEvents 200 -ErrorAction SilentlyContinue |
+      Where-Object { $_.Message -match 'chrome|msedge|explorer' } |
+      Select-Object -First 30)
+  } catch {
+    $lines += "EVENT LOG ERROR: $($_.Exception.Message)"
+  }
+  $script:browserHangEventCount = $events.Count
+  if ($events.Count -eq 0) {
+    $lines += 'no matching events (or the event log is unavailable)'
+  } else {
+    foreach ($event in $events) {
+      $lines += ("{0:o} Provider={1} Id={2} Level={3}" -f $event.TimeCreated, $event.ProviderName, $event.Id, $event.LevelDisplayName)
+      $message = [string]$event.Message
+      $first = ($message -split "`r?`n" | Select-Object -First 3) -join ' | '
+      if ($first.Length -gt 500) { $first = $first.Substring(0, 500) + '...' }
+      $lines += "  $first"
+    }
+  }
+  $lines
+}
+
+# ---------------------------------------------------------------------------
+# 6. Processes
 # ---------------------------------------------------------------------------
 Write-Section 'processes.txt' {
   $lines = @()
@@ -695,6 +821,7 @@ Write-TextFile 'README.txt' @(
   '  dsh-version.txt          - DSH installation and version',
   '  profiles.txt             - DSH profiles, configs and hub.log',
   '  quickdesk-install.txt    - QuickDesk install path/version/launcher files',
+  '  browser-hang.txt         - dsh-computer-use-win version, Chrome/Edge/Explorer state and hang events',
   '  processes.txt            - running DSH and QuickDesk sidecar processes',
   '  launcher-log.txt         - QuickDesk sidecar log (or MISSING)',
   '  launcher-prerequisites.txt - Add-Type / C# compile / mutex / spawn tests',
@@ -727,6 +854,20 @@ $summary += "QuickDesk installs:"
 $installs = @(Find-QuickDeskInstalls)
 if ($installs.Count -eq 0) { $summary += '  none found under ~/.dsh/profiles' }
 foreach ($item in $installs) { $summary += "  $($item.Profile): $($item.PluginDir)" }
+$summary += ''
+$summary += 'dsh-computer-use-win requirement: >= 0.6.0'
+if ($script:computerUseInstalls.Count -eq 0) {
+  $summary += '  not found (another desktop provider may be in use)'
+} else {
+  foreach ($item in $script:computerUseInstalls) {
+    $summary += "  $($item.Profile): $($item.Version)"
+  }
+  if ($script:oldComputerUse.Count -gt 0) {
+    $summary += "  REQUIREMENT FAIL: $($script:oldComputerUse -join ', ')"
+  }
+}
+$summary += "unresponsive browser/Explorer processes now: $($script:browserHangUnresponsive)"
+$summary += "browser hang events in the last 24h: $($script:browserHangEventCount)"
 $summary += ''
 $summary += "launcher.ps1: $(if ($script:launcherPath) { $script:launcherPath } else { 'NOT FOUND' })"
 $summary += "launcher.log found: $($script:launcherLogFound) $(if ($script:launcherLogPath) { "($script:launcherLogPath)" } else { '' })"
